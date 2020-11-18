@@ -7,4 +7,4 @@ Flor Sanders
 
 Lander Verloove
 
-Lauren Van De Ginste
+Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
