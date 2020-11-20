@@ -3,7 +3,7 @@ Robotics 2020-2021 Project: Minesweeping robot - Group 8
 
 Henrique Rodrigues
 
-Flor Sanders
+Flor Sanders - Flor Sanders
 
 Lander Verloove
 
