@@ -136,13 +136,13 @@ class OpenLoopDriver(RobotController):
         In this case it is a square loop
         """
         self.go_forward(2, 0.5)
-        self.turn(3.5, 0.5)
+        self.turn(math.pi, 0.5)
         self.go_forward(2, 0.5)
-        self.turn(3.5, 0.5)
+        self.turn(math.pi, 0.5)
         self.go_forward(2, 0.5)
-        self.turn(3.5, 0.5)
+        self.turn(math.pi, 0.5)
         self.go_forward(2, 0.5)
-        self.turn(3.5, 0.5)
+        self.turn(math.pi, 0.5)
 
 # Run the open loop driver if this script is called
 if __name__  == "__main__":
