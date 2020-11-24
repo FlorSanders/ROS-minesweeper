@@ -2,12 +2,13 @@
 
 # Importing required libraries
 import rospy as ros
-import sys
 import time
+import sys
 import numpy as np
 
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
+from sensor_msgs.msg import LaserScan
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 # Most generic abstract class to handle ROS publishing and subscribing
@@ -22,20 +23,25 @@ class RobotController(object):
         """"
         Initialization with definition for the subscribers and publishers as well as some general parameters and variables.
         """
-        # ROS subscribers and publishers
-        self.node_name = "square_trajectory"
+        # Name of our node
+        self.node_name = "robot_controller"
+        # ROS subscription and publication topics
         self.odom_sub_name = "/odom"
+        self.lds_sub_name = "/scan"
         self.vel_pub_name = "/cmd_vel"
+        # Rose subscribers and publishers
         self.odom_sub = None
+        self.lds_sub = None
         self.vel_pub = None
 
         # Ros parameters
-        self.pub_rate = 0.1
+        self.pub_rate = 0.05
         self.queue_size = 2
 
         # Variables to store sensor information in
         self.position = None
         self.orientation = None
+        self.lds_ranges = None
 
     def start_ros(self):
         """
@@ -52,6 +58,7 @@ class RobotController(object):
 
         # Subscribers and publishers
         self.odom_sub = ros.Subscriber(self.odom_sub_name, Odometry, callback=self.__odom_ros_sub, queue_size=self.queue_size)
+        self.lds_sub = ros.Subscriber(self.lds_sub_name, LaserScan, callback=self.__lds_ros_sub, queue_size=self.queue_size)
         self.vel_pub = ros.Publisher(self.vel_pub_name, Twist, queue_size=self.queue_size)
         
     def stop_robot(self):
@@ -73,11 +80,11 @@ class RobotController(object):
         Helper function to make the robot drive forward forward at speed v for a given duration tau
         """
         # Set the initial time
-        self.t_init = time.time()
+        self.t_init = ros.get_time()
         
         # While we don't go over duration, move forward
         msg = Twist()
-        while time.time() - self.t_init < tau and not ros.is_shutdown():
+        while ros.get_time() - self.t_init < tau and not ros.is_shutdown():
             msg.linear.x = v
             msg.angular.z = 0
             self.__vel_ros_pub(msg)
@@ -111,11 +118,11 @@ class RobotController(object):
         Helper function to make the robot turn at angular speed omega for a given duration tau
         """
         # Set the initial time
-        self.t_init = time.time()
+        self.t_init = ros.get_time()
 
         # While we don't go over duration, turn
         msg = Twist()
-        while time.time() - self.t_init < tau and not ros.is_shutdown():
+        while ros.get_time() - self.t_init < tau and not ros.is_shutdown():
             msg.linear.x = 0
             msg.angular.z = omega
             self.__vel_ros_pub(msg)
@@ -150,6 +157,12 @@ class RobotController(object):
         """
         self.position = msg.pose.pose.position
         self.orientation = msg.pose.pose.orientation
+    
+    def __lds_ros_sub(self, msg):
+        """
+        Handles subscription for the Light Distance Sensor topic.
+        """
+        self.lds_ranges = msg.ranges
 
     def __vel_ros_pub(self, msg):
         """
@@ -179,24 +192,98 @@ class OpenLoopDriver(RobotController):
         while self.position is None:
             print('Sleeping...')
             self.rate.sleep()
-        self.go_forward_by(2, 0.5)
+        self.go_forward_by(1, 0.5)
         self.turn_by(np.pi/2, 0.5)
-        self.go_forward_by(2, 0.5)
+        self.go_forward_by(1, 0.5)
         self.turn_by(np.pi/2, 0.5)
-        self.go_forward_by(2, 0.5)
+        self.go_forward_by(1, 0.5)
         self.turn_by(np.pi/2, 0.5)
-        self.go_forward_by(2, 0.5)
+        self.go_forward_by(1, 0.5)
         self.turn_by(np.pi/2, 0.5)
         # Job is done -- Stopping the robot
         self.stop_robot()
 
+# First "minesweeper strategy": random movement with obstacle avoidance
+class RandomRoomba(RobotController):
+    """
+    Class implements a random trajectory with obstacle avoidance, based on the Laser Distance Sensor (LDS).
+    The principle is inspired on the commercially available Roomba vacuum cleaners
+    """
+
+    def __init__(self):
+        """
+        Initialize the roomba.
+        """
+        # Use the superclass initialization function
+        super(RandomRoomba, self).__init__()
+        self.pub_rate = 10
+    
+    def scan_for_obstacles(self):
+        """
+        Uses the LDS to scan for obstacles that are in our path.
+        Returns whether we are close to an object (< 0.5m) as well as the full array of ranges.
+        """
+        # Fetching our ranges
+        ranges = np.array(list(self.lds_ranges))
+        
+        # If nothing is detected, the lds returns zero. Changing this by a long distance (4m)
+        ranges[ranges == 0.] = 4.
+
+        # Select ranges in the direction we are driving
+        relevant_ranges = np.concatenate((ranges[-12:], ranges[:12])) # Not too sure about these indices
+        blocked = np.any(relevant_ranges < 0.75)
+
+        print(relevant_ranges)
+        print(np.argmin(ranges), np.min(ranges), len(ranges), blocked)
+
+        # Return whether we are close to an object (within 0.5m) together with the whole range
+        return blocked, ranges
+
+    def move(self):
+        """
+        1. Wait until readings from the sensor are available.
+        2. Moves straight until the sensor detects possible collision.
+        3. Turns towards an unblocked direction and continues.
+        """
+        # Wait until sensor readings are available
+        while (self.position is None or self.lds_ranges is None) and not ros.is_shutdown():
+            print('Sleeping...')
+            self.rate.sleep()
+
+        # If these are available, move straight until blocked or unblock
+        while not ros.is_shutdown():
+            blocked, ranges = self.scan_for_obstacles()
+            
+            if blocked:
+                unblocked_directions = np.linspace(-np.pi, np.pi, len(ranges))[ranges >= 0.5]
+                random_choice = np.random.choice(unblocked_directions, size=1)
+                self.turn_by(random_choice)
+            else:
+                self.go_forward_for(0.05, 0.25)
+
+def usage():
+    return f'{sys.argv[0]} [squareloop/randomroomba]'
+
+
 # Run the open loop driver if this script is called
 if __name__  == "__main__":
     try:
-        # Start the contoller
-        controller = OpenLoopDriver()
-        controller.start_ros()
-        controller.move()
+        # Check for correct usage
+        if len(sys.argv) > 1:
+            # Start the contoller
+            if sys.argv[1] == 'squareloop':
+                controller = OpenLoopDriver()
+            elif sys.argv[1] == 'randomroomba':
+                controller = RandomRoomba()
+            else:
+                print(usage())
+                sys.exit(-1)
+            # Start the node and apply the movement strategy
+            controller.start_ros()
+            controller.move()
+        else:
+            print(usage())
+            sys.exit(-1)
     except ros.ROSInterruptException:
         # We do this to avoid accidentally continuing to run code after the module is shut down
         pass

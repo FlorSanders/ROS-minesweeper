@@ -162,7 +162,7 @@ include_directories(
 catkin_install_python(PROGRAMS
   nodes/obstacle_avoidance
   nodes/motion_detection
-  scripts/testscript.py
+  scripts/controller.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
