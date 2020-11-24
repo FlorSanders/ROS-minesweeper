@@ -1,16 +1,17 @@
 #!/ur/bin.env python
 
 # Importing required libraries
-import math
 import rospy as ros
 import sys
 import time
+import numpy as np
 
-from geometry_msgs.msg import Twist, Pose
+from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 # Most generic abstract class to handle ROS publishing and subscribing
+# Add all available sensors and algorithms to this thing and make subclasses which define the move funcion and achieve greatness
 class RobotController(object):
     """
     Abstract class to control a trajectory on the turtlebot.
@@ -25,15 +26,16 @@ class RobotController(object):
         self.node_name = "square_trajectory"
         self.odom_sub_name = "/odom"
         self.vel_pub_name = "/cmd_vel"
-        self.vel_pub = None
         self.odom_sub = None
+        self.vel_pub = None
 
         # Ros parameters
-        self.pub_rate = 5
+        self.pub_rate = 0.1
         self.queue_size = 2
 
         # Variables to store sensor information in
-        self.odom_pose = None
+        self.position = None
+        self.orientation = None
 
     def start_ros(self):
         """
@@ -43,7 +45,7 @@ class RobotController(object):
         ros.init_node(self.node_name, log_level=ros.INFO, anonymous=True)
 
         # Setting ros rate
-        self.rate = ros.Rate(self.pub_rate)
+        self.rate = ros.Rate(1/self.pub_rate)
 
         # Callback function on shutdown
         ros.on_shutdown(self.stop_robot)
@@ -61,16 +63,84 @@ class RobotController(object):
         self.t_init = time.time()
     
         while time.time() - self.t_init < 1 and not ros.is_shutdown():
-            self.vel_ros_pub(Twist())
+            self.__vel_ros_pub(Twist())
             self.rate.sleep()
         
         sys.exit('The robot has been stopped.')
+    
+    def go_forward_for(self, tau, v=0.5):
+        """
+        Helper function to make the robot drive forward forward at speed v for a given duration tau
+        """
+        # Set the initial time
+        self.t_init = time.time()
+        
+        # While we don't go over duration, move forward
+        msg = Twist()
+        while time.time() - self.t_init < tau and not ros.is_shutdown():
+            msg.linear.x = v
+            msg.angular.z = 0
+            self.__vel_ros_pub(msg)
+            self.rate.sleep()
 
+    def go_forward_by(self, d, v):
+        """
+        Helper function to make the robot drive forward a certain distance at a given speed v
+        """
+        # Get the initial position
+        x_init = self.position.x
+        y_init = self.position.y
+
+        # Move by the amount we wanted to move by
+        msg = Twist()
+        while (self.position.x - x_init)**2 + (self.position.y - y_init)**2 < d**2 and not ros.is_shutdown():
+            msg.linear.x = v
+            msg.angular.z = 0
+            self.__vel_ros_pub(msg)
+            self.rate.sleep()
+
+    def get_z_rotation(self, orientation):
+        """
+        Calculates the current z-angle based on     
+        """
+        (_, _, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+        return yaw
+    
+    def turn_for(self, tau, omega=0.5):
+        """
+        Helper function to make the robot turn at angular speed omega for a given duration tau
+        """
+        # Set the initial time
+        self.t_init = time.time()
+
+        # While we don't go over duration, turn
+        msg = Twist()
+        while time.time() - self.t_init < tau and not ros.is_shutdown():
+            msg.linear.x = 0
+            msg.angular.z = omega
+            self.__vel_ros_pub(msg)
+            self.rate.sleep()
+
+    def turn_by(self, alpha, omega=0.5):
+        """
+        Helper function to make the robot turn by a certain angle at a given angular speed omega
+        """
+        # Get the initial angle
+        alpha_init = self.get_z_rotation(self.orientation)
+
+        # Move by the angle we wanted to move by
+        msg = Twist()
+        while abs(self.get_z_rotation(self.orientation) - alpha_init) < abs(alpha) and not ros.is_shutdown():
+            msg.angular.z = np.sign(alpha)*omega
+            msg.linear.x = 0
+            self.__vel_ros_pub(msg)
+            self.rate.sleep()
+        
     def move(self):
         """
+        Function that moves according to the predefined strategy.
         To be overwritten in the inhereting class!
         """
-
         while not ros.is_shutdown():
             self.rate.sleep()
     
@@ -78,9 +148,10 @@ class RobotController(object):
         """
         Handles subscription for the odometry topic.
         """
-        self.odom_pose = msg.pose.pose
+        self.position = msg.pose.pose.position
+        self.orientation = msg.pose.pose.orientation
 
-    def vel_ros_pub(self, msg):
+    def __vel_ros_pub(self, msg):
         """
         Handles publishing of 'msg' for the velocity topic.
         """
@@ -99,50 +170,25 @@ class OpenLoopDriver(RobotController):
         """
         # Simply use the initialization of the superclass
         super(OpenLoopDriver, self).__init__()
-    
-    def go_forward(self, tau, v):
-        """
-        Helper function to make the robot drive forward forward at speed v for a given duration tau
-        """
-        # Set the initial time
-        self.t_init = time.time()
-        
-        # While we don't go over duration, move forward
-        msg = Twist()
-        while time.time() - self.t_init < tau and not ros.is_shutdown():
-            msg.linear.x = v
-            msg.angular.z = 0
-            self.vel_ros_pub(msg)
-            self.rate.sleep()
-
-    def turn(self, tau, omega):
-        """
-        Helper function to make the robot turn at angular speed omega for a given duration tau
-        """
-        # Set the initial time
-        self.t_init = time.time()
-
-        # While we don't go over duration, turn
-        msg = Twist()
-        while time.time() - self.t_init < tau and not ros.is_shutdown():
-            msg.linear.x = 0
-            msg.angular.z = omega
-            self.vel_ros_pub(msg)
-            self.rate.sleep()
-    
+  
     def move(self):
         """
         Function that moves according to the predefined trajectory.
         In this case it is a square loop
         """
-        self.go_forward(2, 0.5)
-        self.turn(math.pi, 0.5)
-        self.go_forward(2, 0.5)
-        self.turn(math.pi, 0.5)
-        self.go_forward(2, 0.5)
-        self.turn(math.pi, 0.5)
-        self.go_forward(2, 0.5)
-        self.turn(math.pi, 0.5)
+        while self.position is None:
+            print('Sleeping...')
+            self.rate.sleep()
+        self.go_forward_by(2, 0.5)
+        self.turn_by(np.pi/2, 0.5)
+        self.go_forward_by(2, 0.5)
+        self.turn_by(np.pi/2, 0.5)
+        self.go_forward_by(2, 0.5)
+        self.turn_by(np.pi/2, 0.5)
+        self.go_forward_by(2, 0.5)
+        self.turn_by(np.pi/2, 0.5)
+        # Job is done -- Stopping the robot
+        self.stop_robot()
 
 # Run the open loop driver if this script is called
 if __name__  == "__main__":
