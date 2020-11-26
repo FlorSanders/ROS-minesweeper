@@ -39,7 +39,19 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
 - Launch one of the available minesweeping strategies: E.g. `rosrun minesweeper_package controller.py randomroomba`.
   - Options: `squareloop/randomroomba`.
 - Enjoy!
-
+## Setup of The New World(s)
+- Link the model folder
+  ```
+  echo  'export GAZEBO_MODEL_PATH=~$(ROBOTICS_PATH)/src/minesweeper_package/gazebo_models:${GAZEBO_MODEL_PATH}' >> ~/.bahsrc
+  source ~/.bashrc
+  ```
+- Launch gazebo
+  
+  ```
+  roscore
+  roslaunch turtlebot3_gazebo minefield.launch
+  ```
+ 
 ## Report
 
 Overleaf report-link: https://www.overleaf.com/8928521917hdmphszkkkrj
