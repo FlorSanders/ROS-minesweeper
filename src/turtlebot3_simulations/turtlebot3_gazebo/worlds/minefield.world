@@ -1,0 +1,35 @@
+<sdf version='1.7'>
+  <world name='default'>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <include>
+        <uri>model://minefield</uri>
+        <name>minefield</name>
+    </include>
+
+    <population name="mines">
+      <model name="mines">
+        <include>
+          <static>true</static>
+          <uri>model://coke_can</uri>
+        </include>
+      </model>
+      <pose>0 0 -0.125 0 0 0</pose>
+      <box>
+        <size>9 4.5 0.0001</size>
+      </box>
+      <model_count>50</model_count>
+      <distribution>
+        <type>random</type>
+      </distribution>
+    </population>
+
+  </world>
+</sdf>
