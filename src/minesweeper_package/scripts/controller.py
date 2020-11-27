@@ -1,4 +1,4 @@
-#!/ur/bin.env python
+#!/usr/bin.env python
 
 # Importing required libraries
 import rospy as ros
@@ -35,7 +35,7 @@ class RobotController(object):
         self.vel_pub = None
 
         # Ros parameters
-        self.pub_rate = 0.05
+        self.pub_rate = 0.1
         self.queue_size = 2
 
         # Variables to store sensor information in
@@ -216,7 +216,6 @@ class RandomRoomba(RobotController):
         """
         # Use the superclass initialization function
         super(RandomRoomba, self).__init__()
-        self.pub_rate = 10
     
     def scan_for_obstacles(self):
         """
@@ -231,7 +230,7 @@ class RandomRoomba(RobotController):
 
         # Select ranges in the direction we are driving
         relevant_ranges = np.concatenate((ranges[-12:], ranges[:12])) # Not too sure about these indices
-        blocked = np.any(relevant_ranges < 0.75)
+        blocked = np.any(relevant_ranges < 0.5)
 
         print(relevant_ranges)
         print(np.argmin(ranges), np.min(ranges), len(ranges), blocked)
