@@ -38,6 +38,7 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
 - Launch rviz to visualize the readings of the turtlebot while operating: `roslaunch turtlebot3_fake turtlebot3_fake.launch`.
 - Launch one of the available minesweeping strategies: E.g. `rosrun minesweeper_package controller.py randomroomba`.
   - Options: `squareloop/randomroomba`.
+- Launch the scripts from lab session 3: `roslaunch minesweeper_package my_launch_file.launch`.
 - Enjoy!
 ## Setup of The New World(s)
 - Link the model folder
