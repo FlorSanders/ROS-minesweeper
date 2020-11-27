@@ -1,0 +1,208 @@
+<?xml version="1.0" ?>
+<sdf version='1.7'>
+  <world name='Minesweeping'>
+    <!--General-->
+    <include>
+      <uri>model://grass_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <!--Walls: Side 1 (Straight)-->
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall1</name>
+      <pose>-8 -10 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall2</name>
+      <pose>-5 -10 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall3</name>
+      <pose>-3 -10 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall4</name>
+      <pose>0 -10 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall5</name>
+      <pose>3 -10 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall6</name>
+      <pose>6 -10 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall7</name>
+      <pose>9 -10 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <!--Walls: Side 2 (Straight)-->
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall8</name>
+      <pose>-8 9 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall9</name>
+      <pose>-5 9 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall10</name>
+      <pose>-3 9 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall11</name>
+      <pose>0 9 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall12</name>
+      <pose>3 9 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall13</name>
+      <pose>6 9 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall14</name>
+      <pose>9 9 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <!--Walls: Side 3 (cross)-->
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall15</name>
+      <pose>-9 -8 0 0 0 1.5708</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall16</name>
+      <pose>-9 -5 0 0 0 1.5708</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall17</name>
+      <pose>-9 -2 0 0 0 1.5708</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall18</name>
+      <pose>-9 1 0 0 0 1.5708</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall19</name>
+      <pose>-9 4 0 0 0 1.5708</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall20</name>
+      <pose>-9 7 0 0 0 1.5708</pose>
+      <static>true</static>
+    </include>
+    <!--Walls: Side 4 (cross)-->
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall21</name>
+      <pose>10 -8 0 0 0 1.5708</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall22</name>
+      <pose>10 -5 0 0 0 1.5708</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall23</name>
+      <pose>10 -2 0 0 0 1.5708</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall24</name>
+      <pose>10 1 0 0 0 1.5708</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall25</name>
+      <pose>10 4 0 0 0 1.5708</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>model://brick_box_3x1x3</uri>
+      <name>Wall26</name>
+      <pose>10 7 0 0 0 1.5708</pose>
+      <static>true</static>
+    </include>
+        <!--Decoration-->
+     <include>
+      <uri>model://oak_tree</uri>
+      <name>Tree1</name>
+      <pose>-4.5 -3.5 0 0 0 0</pose>
+       <static>true</static>
+    </include> 
+    <include>   
+      <uri>model://pine_tree</uri>
+      <name>Tree2</name>
+      <pose>5 3 0 0 0 0</pose>
+      <static>true</static>
+    </include>     
+    <include>   
+      <uri>model://telephone_pole</uri>
+      <name>Pole1</name>
+      <pose>6 -6 0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <!--Distributions-->
+    <population name="can_population1">
+      <model name="WoodCube">
+        <include>
+          <static>true</static>
+          <uri>model://wood_cube_7_5cm</uri>
+        </include>
+      </model>
+      <pose>0 0 -0.075 0 0 0</pose>
+      <box>
+        <size>20 18 0.01</size>
+      </box>
+      <model_count>500</model_count>
+      <distribution>
+        <type>random</type>
+      </distribution>
+    </population>
+  </world>
+</sdf>
