@@ -49,7 +49,9 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
   
   ```
   roscore
-  roslaunch turtlebot3_gazebo minefield.launch
+  roslaunch turtlebot3_gazebo minefield.launch #Lander
+  OR
+  roslaunch turtlebot3_gazebo turtlebot3_minesweeping.launch #Lauren
   ```
  
 ## Report
