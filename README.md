@@ -31,9 +31,18 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
 - Change directory to this repository. `cd ~/Group-8/`.
 
 - Build the source. `catkin_make`.
-
+## General Usage
+ 1. Go to the working directory of the project
+ 1. execute `catkin_make && source devel/setup.bash && roscore`
+ 1. Bring up gazebo `roslaunch turtlebot3_gazebo <launchfile.launch>`
+      * Launchfiles: 
+        * minefield.launch
+        * turtlebot3_minesweeping.launch
+ 1. Steer the robot: `roslaunch minesweeper_package <launchfile.launch>`
+      * launchfiles: 
+        * controller.py randomroomba
+        * my_launch_file.launch
 ## Usage
-
 - Launch a world in the gazebo simulator along with a turtlebot: E.g. `roslaunch turtlebot3_gazebo turtlebot3_world.launch`.
 - Launch rviz to visualize the readings of the turtlebot while operating: `roslaunch turtlebot3_fake turtlebot3_fake.launch`.
 - Launch one of the available minesweeping strategies: E.g. `rosrun minesweeper_package controller.py randomroomba`.
