@@ -5,6 +5,7 @@ import rospy as ros
 import time
 import sys
 import numpy as np
+import argparse
 
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
@@ -19,7 +20,7 @@ class RobotController(object):
     Abstracts away the declaration of ros messages and subscription to ros topics for the rest of the program
     """
 
-    def __init__(self):
+    def __init__(self, speed=1.0, angularspeed=1.0, detectionthreshold=0.75, pubrate=0.1, duration=1.0, distance=1.0, angle=np.pi/2, debug=False):
         """"
         Initialization with definition for the subscribers and publishers as well as some general parameters and variables.
         """
@@ -35,13 +36,30 @@ class RobotController(object):
         self.vel_pub = None
 
         # Ros parameters
-        self.pub_rate = 0.1
+        self.pub_rate = pubrate
         self.queue_size = 2
 
         # Variables to store sensor information in
         self.position = None
         self.orientation = None
         self.lds_ranges = None
+
+        # Velocity, distance and timing parameters
+        self.tau = duration
+        self.v = speed
+        self.omega = angularspeed
+        self.alpha = angle
+        self.d = distance
+
+        # Debugging option
+        self.debug = debug
+
+    def printd(self, msg):
+        """
+        Function that prints only if debug is active
+        """
+        if self.debug:
+            print(msg)
 
     def start_ros(self):
         """
@@ -177,12 +195,12 @@ class OpenLoopDriver(RobotController):
     It uses the Robotcontroller as parent class to handle the ros intricacies.
     """
 
-    def __init___(self):
+    def __init___(self, **params):
         """
         Initialize the open loop driver controller.
         """
         # Simply use the initialization of the superclass
-        super(OpenLoopDriver, self).__init__()
+        super(OpenLoopDriver, self).__init__(**params)
   
     def move(self):
         """
@@ -190,15 +208,11 @@ class OpenLoopDriver(RobotController):
         In this case it is a square loop
         """
         while self.position is None:
-            print('Sleeping...')
+            self.printd('Sleeping...')
             self.rate.sleep()
-        self.go_forward_by(1, 0.5)
-        self.turn_by(np.pi/2, 0.5)
-        self.go_forward_by(1, 0.5)
-        self.turn_by(np.pi/2, 0.5)
-        self.go_forward_by(1, 0.5)
-        self.turn_by(np.pi/2, 0.5)
-        self.go_forward_by(1, 0.5)
+        for i in range(4):
+            self.go_forward_by(self.d, self.v)
+            self.turn_by(self.alpha, self.omega)
         self.turn_by(np.pi/2, 0.5)
         # Job is done -- Stopping the robot
         self.stop_robot()
@@ -210,12 +224,12 @@ class RandomRoomba(RobotController):
     The principle is inspired on the commercially available Roomba vacuum cleaners
     """
 
-    def __init__(self):
+    def __init__(self, **params):
         """
         Initialize the roomba.
         """
         # Use the superclass initialization function
-        super(RandomRoomba, self).__init__()
+        super(RandomRoomba, self).__init__(**params)
     
     def scan_for_obstacles(self):
         """
@@ -232,8 +246,7 @@ class RandomRoomba(RobotController):
         relevant_ranges = np.concatenate((ranges[-12:], ranges[:12])) # Not too sure about these indices
         blocked = np.any(relevant_ranges < 0.5)
 
-        print(relevant_ranges)
-        print(np.argmin(ranges), np.min(ranges), len(ranges), blocked)
+        self.printd((np.argmin(ranges), np.min(ranges), len(ranges), blocked))
 
         # Return whether we are close to an object (within 0.5m) together with the whole range
         return blocked, ranges
@@ -246,7 +259,7 @@ class RandomRoomba(RobotController):
         """
         # Wait until sensor readings are available
         while (self.position is None or self.lds_ranges is None) and not ros.is_shutdown():
-            print('Sleeping...')
+            self.printd('Sleeping...')
             self.rate.sleep()
 
         # If these are available, move straight until blocked or unblock
@@ -256,33 +269,88 @@ class RandomRoomba(RobotController):
             if blocked:
                 unblocked_directions = np.linspace(-np.pi, np.pi, len(ranges))[ranges >= 0.5]
                 random_choice = np.random.choice(unblocked_directions, size=1)
-                self.turn_by(random_choice)
+                self.turn_by(random_choice, omega=self.omega)
             else:
-                self.go_forward_for(0.05, 0.25)
+                self.go_forward_for(tau=self.tau, v=self.v)
 
-def usage():
-    return f'{sys.argv[0]} [squareloop/randomroomba]'
 
+strategies = {
+    'squareloop': OpenLoopDriver,
+    'randomroomba': RandomRoomba,
+}
 
 # Run the open loop driver if this script is called
 if __name__  == "__main__":
+    # Helper library that parses command line option
+    parser = argparse.ArgumentParser(description = 'Minesweeper controller for our robot')
+    parser.add_argument('strategy', 
+        help=(f"Which minesweeping strategy you want to use, Options: [{'/'.join(strategies.keys())}]"),
+        nargs=1,
+        type=str
+    )
+    parser.add_argument('--speed',
+        help='Linear speed of the robot when moving',
+        nargs='?',
+        default=0.5,
+        type=float
+    )
+    parser.add_argument('--angularspeed',
+        help='Angular speed of the robot when turning',
+        nargs='?',
+        default=1.0,
+        type=float
+    )
+    parser.add_argument('--detectionthreshold',
+        help='Distance threshold fr when the robot detects an obstacle in its route',
+        nargs='?',
+        default=0.5,
+        type=float
+    )
+    parser.add_argument('--pubrate',
+        help='Delay in seconds between instructions sent to the robot',
+        nargs='?',
+        default=0.1,
+        type=float
+    )
+    parser.add_argument('--duration',
+        help='Default step duration the robot moves for',
+        nargs='?',
+        default=0.25,
+        type=float
+    )
+    parser.add_argument('--angle',
+        help='Default angle the robot rotates by',
+        nargs='?',
+        default=np.pi/2,
+        type=float
+    )
+    parser.add_argument('--distance',
+        help='Default distance the robot moves by',
+        nargs='?',
+        default=1.0,
+        type=float
+    )
+    parser.add_argument('--debug',
+        help='Writes debug messages using print() when added',
+        action='store_true'
+    )
+
+    # Parsing sys.argv
+    args = parser.parse_args()
+    argsdict = vars(args)
+    strategy = argsdict.pop('strategy', None)[0]
+
+    if args.debug:
+        print(args)
+    
+    # Launch the controller
     try:
-        # Check for correct usage
-        if len(sys.argv) > 1:
-            # Start the contoller
-            if sys.argv[1] == 'squareloop':
-                controller = OpenLoopDriver()
-            elif sys.argv[1] == 'randomroomba':
-                controller = RandomRoomba()
-            else:
-                print(usage())
-                sys.exit(-1)
-            # Start the node and apply the movement strategy
+        if strategy in list(strategies.keys()):
+            controller = strategies[strategy](**argsdict)
             controller.start_ros()
             controller.move()
         else:
-            print(usage())
-            sys.exit(-1)
+            parser.print_help()
     except ros.ROSInterruptException:
         # We do this to avoid accidentally continuing to run code after the module is shut down
         pass
