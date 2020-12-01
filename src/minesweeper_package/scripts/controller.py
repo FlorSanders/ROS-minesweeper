@@ -50,6 +50,7 @@ class RobotController(object):
         self.omega = angularspeed
         self.alpha = angle
         self.d = distance
+        self.thresh = detectionthreshold
 
         # Debugging option
         self.debug = debug
@@ -93,10 +94,16 @@ class RobotController(object):
         
         sys.exit('The robot has been stopped.')
     
-    def go_forward_for(self, tau, v=0.5):
+    def go_forward_for(self, tau=None, v=None):
         """
         Helper function to make the robot drive forward forward at speed v for a given duration tau
         """
+        # If no arguments are given, set default values
+        if tau == None:
+            tau = self.tau
+        if v == None:
+            v = self.v
+
         # Set the initial time
         self.t_init = ros.get_time()
         
@@ -108,10 +115,16 @@ class RobotController(object):
             self.__vel_ros_pub(msg)
             self.rate.sleep()
 
-    def go_forward_by(self, d, v):
+    def go_forward_by(self, d=None, v=None):
         """
         Helper function to make the robot drive forward a certain distance at a given speed v
         """
+        # If no arguments are given, set default values
+        if d == None:
+            d = self.d
+        if v == None:
+            v = self.v
+
         # Get the initial position
         x_init = self.position.x
         y_init = self.position.y
@@ -131,10 +144,16 @@ class RobotController(object):
         (_, _, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
         return yaw
     
-    def turn_for(self, tau, omega=0.5):
+    def turn_for(self, tau=None, omega=None):
         """
         Helper function to make the robot turn at angular speed omega for a given duration tau
         """
+        # If no arguments are given, set default values
+        if tau == None:
+            tau = self.tau
+        if omega == None:
+            omega = self.omega
+
         # Set the initial time
         self.t_init = ros.get_time()
 
@@ -146,10 +165,16 @@ class RobotController(object):
             self.__vel_ros_pub(msg)
             self.rate.sleep()
 
-    def turn_by(self, alpha, omega=0.5):
+    def turn_by(self, alpha=None, omega=None):
         """
         Helper function to make the robot turn by a certain angle at a given angular speed omega
         """
+        # If no arguments are given, set default values
+        if alpha == None:
+            alpha = self.alpha
+        if omega == None:
+            omega = self.omega
+
         # Get the initial angle
         alpha_init = self.get_z_rotation(self.orientation)
 
@@ -213,7 +238,6 @@ class OpenLoopDriver(RobotController):
         for i in range(4):
             self.go_forward_by(self.d, self.v)
             self.turn_by(self.alpha, self.omega)
-        self.turn_by(np.pi/2, 0.5)
         # Job is done -- Stopping the robot
         self.stop_robot()
 
@@ -241,11 +265,12 @@ class RandomRoomba(RobotController):
         
         # If nothing is detected, the lds returns zero. Changing this by a long distance (4m)
         ranges[ranges == 0.] = 4.
+        ranges[np.isinf(ranges)] = 4.
 
         # Select ranges in the direction we are driving
         relevant_ranges = np.concatenate((ranges[-12:], ranges[:12])) # Not too sure about these indices
-        blocked = np.any(relevant_ranges < 0.5)
-
+        blocked = np.any(relevant_ranges < self.thresh)
+        
         self.printd((np.argmin(ranges), np.min(ranges), len(ranges), blocked))
 
         # Return whether we are close to an object (within 0.5m) together with the whole range
@@ -267,12 +292,18 @@ class RandomRoomba(RobotController):
             blocked, ranges = self.scan_for_obstacles()
             
             if blocked:
-                unblocked_directions = np.linspace(-np.pi, np.pi, len(ranges))[ranges >= 0.5]
-                random_choice = np.random.choice(unblocked_directions, size=1)
-                self.turn_by(random_choice, omega=self.omega)
+                # Picking out the directions that are not actually blocked
+                unblocked_directions = np.concatenate([np.linspace(0, np.pi, len(ranges)/2), np.linspace(-np.pi, 0, len(ranges)/2)])[ranges >= self.thresh]
+                # Making a probability distribution such that directions without any obstructions are more likely to be chosen
+                probs = np.exp(ranges[ranges >= self.thresh])
+                try:
+                    probs = probs/np.sum(probs)
+                except:
+                    sys.exit("The robot is trapped, no free angles are available")
+                random_choice = np.random.choice(unblocked_directions, p=probs, size=1)
+                self.turn_by(alpha=random_choice, omega=self.omega)
             else:
                 self.go_forward_for(tau=self.tau, v=self.v)
-
 
 strategies = {
     'squareloop': OpenLoopDriver,
