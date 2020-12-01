@@ -63,7 +63,7 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
   roslaunch turtlebot3_gazebo smallminefield.launch
   roslaunch turtlebot3_gazebo turtlebot3_minesweeping.launch
   ```
- 
+
 ## Report
 
 Overleaf report-link: https://www.overleaf.com/8928521917hdmphszkkkrj
@@ -74,3 +74,4 @@ Overleaf report-link: https://www.overleaf.com/8928521917hdmphszkkkrj
 - Turtlebot tutorials: https://learn.turtlebot.com/
 - Gazebo & roslaunch tutorial: http://gazebosim.org/tutorials?tut=ros_roslaunch&cat=connect_ros
 - Launch turtlebot3 simulations with ros: https://automaticaddison.com/how-to-launch-the-turtlebot3-simulation-with-ros/
+- ROS navigation stack tutorials: https://www.youtube.com/watch?v=5nZc5iSr5is
