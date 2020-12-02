@@ -24,8 +24,9 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
   source /opt/ros/noetic/setup.bash
   source ~/Group-8/devel/setup.bash
   export TURTLEBOT3_MODEL=burger
-  export GAZEBO_MODEL_PATH=~$~/Group-8/src/minesweeper_package/gazebo_models:${GAZEBO_MODEL_PATH}
+  export GAZEBO_MODEL_PATH=~/Group-8/src/minesweeper_package/gazebo_models:${GAZEBO_MODEL_PATH}
   ```
+  Note: the `export GAZEBO_MODEL_PATH=~$(ROBOTICS_PATH)/src/minesweeper_package/gazebo_models:${GAZEBO_MODEL_PATH}` command points towards the newly created Gazebo models and links them.
 
 - Source bashrc. `source ~/.bashrc`.
 
