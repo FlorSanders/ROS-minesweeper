@@ -38,7 +38,8 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
       * Launchfiles: 
         * 0_BasicMinefield.launch
         * 1_BasicMinefield_Small.launch
-        * 2_EnhancedMinefield.launch
+        * 2_EnhancedMinefield_Test.launch
+        * 3_EnhancedMinefield_Small.launch
       * Problems with your graphics card? Execute: `export SVGA_VGPU10=0`
  1. Steer the robot: `roslaunch minesweeper_package <launchfile.launch>`
       * launchfiles: 
@@ -63,7 +64,8 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
   roscore
   roslaunch turtlebot3_gazebo 0_BasicMinefield.launch
   roslaunch turtlebot3_gazebo 1_BasicMinefield_Small.launch
-  roslaunch turtlebot3_gazebo 2_EnhancedMinefield.launch
+  roslaunch turtlebot3_gazebo 2_EnhancedMinefield_Test.launch
+  roslaunch turtlebot3_gazebo 3_EnhancedMinefield_Small.launch
   ```
 
 ## Report
@@ -75,5 +77,7 @@ Overleaf report-link: https://www.overleaf.com/8928521917hdmphszkkkrj
 - Official ROS tutorials: http://wiki.ros.org/ROS/Tutorials
 - Turtlebot tutorials: https://learn.turtlebot.com/
 - Gazebo & roslaunch tutorial: http://gazebosim.org/tutorials?tut=ros_roslaunch&cat=connect_ros
+- Gazebo colors and textures tutorial: http://gazebosim.org/tutorials?tut=color_model
+- Gazebo populations tutorial: http://gazebosim.org/tutorials?tut=model_population&cat=build_world
 - Launch turtlebot3 simulations with ros: https://automaticaddison.com/how-to-launch-the-turtlebot3-simulation-with-ros/
 - ROS navigation stack tutorials: https://www.youtube.com/watch?v=5nZc5iSr5is

@@ -1,28 +1,28 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
-  <model name="brick_box_1x0-5x1">
+  <model name="brick_wall_0.5x0.25x0.5">
     <static>true</static>
     <link name="chassis">
-      <pose>0 0 0.5 0 0 0</pose>
+      <pose>0.25 -0.125 0.25 0 0 0</pose>
       <collision name="collision">
         <geometry>
           <box>
-            <size>1.0 0.5 1.0</size>
+            <size>0.5 0.25 0.5</size>
           </box>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://brick_wall_1x0-5x1/meshes/simple_box.dae</uri>
-            <scale>1.0 0.33333 1.0</scale>
+            <uri>model://brick_wall_0-5x0-25x0-5/meshes/simple_box.dae</uri>
+            <scale>0.5 0.25 0.5</scale>
              <pose>0 0 0 0 0 0</pose>
           </mesh>
         </geometry>
         <material>
           <script>
-            <uri>model://brick_wall_1x0-5x1/materials/scripts</uri>
-            <uri>model://brick_wall_1x0-5x1/materials/textures</uri>
+            <uri>model://brick_wall_0-5x0-25x0-5/materials/scripts</uri>
+            <uri>model://brick_wall_0-5x0-25x0-5/materials/textures</uri>
             <name>BrickBox/Diffuse</name>
           </script>
         </material>

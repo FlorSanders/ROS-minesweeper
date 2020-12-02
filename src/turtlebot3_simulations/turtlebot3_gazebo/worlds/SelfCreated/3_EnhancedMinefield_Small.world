@@ -1,0 +1,131 @@
+<?xml version="1.0" ?>
+<sdf version='1.7'>
+  <world name='Minesweeping'>
+  
+<!--Environment-->
+<!--***************************************************************************************-->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <population name="GrassPlane">
+      <model name="Grass">
+        <include>
+          <static>true</static>
+          <uri>model://grass_plane_1x1</uri>
+        </include>
+      </model>
+      <pose>3 2.5 0 0 0 0</pose>
+      <box>
+        <size>6 5 0.01</size>
+      </box>
+      <distribution>
+        <type>grid</type>
+        <rows>5</rows>
+        <cols>6</cols>
+        <step>1 1 0</step>
+      </distribution>
+    </population>
+    
+<!--Walls-->
+<!--***************************************************************************************-->
+
+    <population name="Wall1">
+      <model name="Wall1">
+        <include>
+          <static>true</static>
+          <uri>model://brick_wall_0-5x0-25x0-5</uri>
+        </include>
+      </model>
+      <pose>3 0 0 0 0 0</pose>
+      <box>
+        <size>6 1 0.01</size>
+      </box>
+      <model_count>12</model_count>
+      <distribution>
+        <type>linear-x</type>
+      </distribution>
+    </population>
+    
+    <population name="Wall2">
+      <model name="Wall2">
+        <include>
+          <static>true</static>
+          <uri>model://brick_wall_0-5x0-25x0-5</uri>
+        </include>
+      </model>
+      <pose>3 5.25 0 0 0 0</pose>
+      <box>
+        <size>6 1 0.01</size>
+      </box>
+      <model_count>12</model_count>
+      <distribution>
+        <type>linear-x</type>
+      </distribution>
+    </population>
+    
+    <population name="Wall3">
+      <model name="Wall3">
+        <include>
+          <static>true</static>
+          <uri>model://brick_wall_0-5x0-25x0-5</uri>
+          <pose>0 0 0 0 0 1.570796</pose>
+        </include>
+      </model>
+      <pose>-0.25 2.5 0 0 0 0</pose>
+      <box>
+        <size>1 5.5 0.01</size>
+      </box>
+      <model_count>11</model_count>
+      <distribution>
+        <type>linear-y</type>
+      </distribution>
+    </population>
+    
+    <population name="Wall4">
+      <model name="Wall4">
+        <include>
+          <static>true</static>
+          <uri>model://brick_wall_0-5x0-25x0-5</uri>
+          <pose>0 0 0 0 0 1.570796</pose>
+        </include>
+      </model>
+      <pose>6 2.5 0 0 0 0</pose>
+      <box>
+        <size>1 5.5 0.01</size>
+      </box>
+      <model_count>11</model_count>
+      <distribution>
+        <type>linear-y</type>
+      </distribution>
+    </population>
+    
+<!--Obstacles-->
+<!--***************************************************************************************-->
+
+    <include>
+      <uri>model://pine_tree</uri>
+      <pose>2 2 0 0 0 0</pose>
+    </include>
+
+
+
+<!--Mines-->
+<!--***************************************************************************************-->
+    <population name="RandomlyDistributedMines">
+      <model name="Landmine">
+        <include>
+          <static>true</static>
+          <uri>model://Landmine_0-018x0-005</uri>
+        </include>
+      </model>
+      <pose>3 2.5 0 0 0 0</pose>
+      <box>
+        <size>6 5 0.01</size>
+      </box>
+      <model_count>30</model_count>
+      <distribution>
+        <type>random</type>
+      </distribution>
+    </population>
+  </world>
+</sdf>
