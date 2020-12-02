@@ -5,7 +5,7 @@
   <arg name="z_pos" default="0.0"/>
   <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/minefield.world"/>
+    <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/SelfCreated/1_BasicMinefield_Small.world"/>
     <!-- more default parameters can be changed here -->
   </include>
   
