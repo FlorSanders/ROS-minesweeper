@@ -24,6 +24,7 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
   source /opt/ros/noetic/setup.bash
   source ~/Group-8/devel/setup.bash
   export TURTLEBOT3_MODEL=burger
+  export GAZEBO_MODEL_PATH=~$~/Group-8/src/minesweeper_package/gazebo_models:${GAZEBO_MODEL_PATH}
   ```
 
 - Source bashrc. `source ~/.bashrc`.
@@ -31,6 +32,7 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
 - Change directory to this repository. `cd ~/Group-8/`.
 
 - Build the source. `catkin_make`.
+
 ## General Usage
  1. Go to the working directory of the project
  1. execute `catkin_make && source devel/setup.bash && roscore`
@@ -45,28 +47,13 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
       * launchfiles: 
         * controller.py randomroomba
         * my_launch_file.launch
-## Usage
+        
+## Testing
 - Launch a world in the gazebo simulator along with a turtlebot: E.g. `roslaunch turtlebot3_gazebo turtlebot3_world.launch`.
 - Launch rviz to visualize the readings of the turtlebot while operating: `roslaunch turtlebot3_fake turtlebot3_fake.launch`.
 - Launch one of the available minesweeping strategies: E.g. `rosrun minesweeper_package controller.py randomroomba`.
   - Options: `squareloop/randomroomba`.
 - Launch the scripts from lab session 3: `roslaunch minesweeper_package my_launch_file.launch`.
-- Enjoy!
-## Setup of The New World(s)
-- Link the model folder
-  ```
-  echo  'export GAZEBO_MODEL_PATH=~$(ROBOTICS_PATH)/src/minesweeper_package/gazebo_models:${GAZEBO_MODEL_PATH}' >> ~/.bahsrc
-  source ~/.bashrc
-  ```
-- Launch gazebo
-  
-  ```
-  roscore
-  roslaunch turtlebot3_gazebo 0_BasicMinefield.launch
-  roslaunch turtlebot3_gazebo 1_BasicMinefield_Small.launch
-  roslaunch turtlebot3_gazebo 2_EnhancedMinefield_Test.launch
-  roslaunch turtlebot3_gazebo 3_EnhancedMinefield_Small.launch
-  ```
 
 ## Report
 
