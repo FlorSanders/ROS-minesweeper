@@ -36,8 +36,10 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
  1. execute `catkin_make && source devel/setup.bash && roscore`
  1. Bring up gazebo `roslaunch turtlebot3_gazebo <launchfile.launch>`
       * Launchfiles: 
-        * minefield.launch
-        * turtlebot3_minesweeping.launch
+        * 0_BasicMinefield.launch
+        * 1_BasicMinefield_Small.launch
+        * 2_EnhancedMinefield.launch
+      * Problems with your graphics card? Execute: `export SVGA_VGPU10=0`
  1. Steer the robot: `roslaunch minesweeper_package <launchfile.launch>`
       * launchfiles: 
         * controller.py randomroomba
@@ -59,9 +61,9 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
   
   ```
   roscore
-  roslaunch turtlebot3_gazebo minefield.launch
-  roslaunch turtlebot3_gazebo smallminefield.launch
-  roslaunch turtlebot3_gazebo turtlebot3_minesweeping.launch
+  roslaunch turtlebot3_gazebo 0_BasicMinefield.launch
+  roslaunch turtlebot3_gazebo 1_BasicMinefield_Small.launch
+  roslaunch turtlebot3_gazebo 2_EnhancedMinefield.launch
   ```
 
 ## Report
