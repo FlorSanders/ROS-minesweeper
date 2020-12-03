@@ -163,6 +163,8 @@ catkin_install_python(PROGRAMS
   nodes/obstacle_avoidance
   nodes/motion_detection
   nodes/mine_detection
+  nodes/random_roomba
+  nodes/open_loop_driver
   scripts/controller.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
