@@ -172,17 +172,78 @@
       </distribution>
     </population>
     
+        <population name="JerseyBarrier1">
+      <model name="JerseyBarrier1">
+        <include>
+          <static>true</static>
+          <uri>model://jersey_barrier_2x0-4x0-6</uri>
+          <pose>0 0 0 0 0 0</pose>
+        </include>
+      </model>
+      <pose>5 -0.2 0 0 0 0</pose>
+      <box>
+        <size>4 1 0.01</size>
+      </box>
+      <model_count>2</model_count>
+      <distribution>
+        <type>linear-x</type>
+      </distribution>
+    </population>
+    
+    <population name="JerseyBarrier2">
+      <model name="JerseyBarrier2">
+        <include>
+          <static>true</static>
+          <uri>model://jersey_barrier_2x0-4x0-6</uri>
+          <pose>0 0 0 0 0 0</pose>
+        </include>
+      </model>
+      <pose>5 7.2 0 0 0 0</pose>
+      <box>
+        <size>4 1 0.01</size>
+      </box>
+      <model_count>2</model_count>
+      <distribution>
+        <type>linear-x</type>
+      </distribution>
+    </population>
+    
 <!--Obstacles-->
 <!--***************************************************************************************-->
 
-    <include>
-      <uri>model://pine_tree</uri>
-      <pose>2 2 0 0 0 0</pose>
-    </include>
-    <include>
-      <uri>model://construction_cone_3x3x3</uri>
-      <pose>2 4 0 0 0 0</pose>
-    </include>
+     <model name="PineTree1">
+        <include>
+         <uri>model://pine_tree</uri>
+         <pose>1 2 0 0 0 0</pose>
+         <static>true</static>
+        </include>
+      </model>
+      
+     <model name="PineTree2">
+        <include>
+         <uri>model://pine_tree</uri>
+         <pose>6.5 6 0 0 0 0</pose>
+         <static>true</static>
+        </include>
+     </model>
+    
+    <population name="ConstructionCones">
+      <model name="ConstructionCones">
+        <include>
+          <static>true</static>
+          <uri>model://construction_cone_3x3x3</uri>
+          <pose>0 0 0 0 0 0</pose>
+        </include>
+      </model>
+      <pose>4 4 0 0 0 0</pose>
+      <box>
+        <size>1 6 0.01</size>
+      </box>
+      <model_count>5</model_count>
+      <distribution>
+        <type>linear-y</type>
+      </distribution>
+    </population>
 
 
 <!--Mines-->
