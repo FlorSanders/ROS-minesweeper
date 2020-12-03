@@ -4,8 +4,13 @@ import numpy as np
 from gazebo_msgs.srv import GetModelState, DeleteModel, SpawnModel, GetWorldProperties
 from geometry_msgs.msg import Pose
 
-class mine_detection(object):
+from my_python_package.abstract_turtle import AbstractTurtle
+
+
+class mine_detection(AbstractTurtle):
     def __init__(self):
+        super(mine_detection, self).__init__()
+        self.node_name = "mine_detection"
         self._robot_radius = 0.105 #radius of the robot, used to remove the mines
         self._mine_radius = self._robot_radius/np.sqrt(5) #radius of a mine, set such that Area_mine=0.2*Area_robot
         self._spawned_mines = 50 #number of mines spawned on initialization
@@ -36,7 +41,7 @@ class mine_detection(object):
                 print("number of mines cleared: {}".format(self.cleared_mines))
 
     def spawn_mines(self):
-        f = open('~/Desktop/Robotics/Group-8/src/minesweeper_package/gazebo_models/coke_can/model.sdf','r')
+        f = open('/home/lander/Desktop/Robotics/Group-8/src/minesweeper_package/gazebo_models/coke_can/model.sdf','r')
         model = f.read()
         pose = Pose()
         for i in range(self._spawned_mines):
@@ -49,11 +54,12 @@ class mine_detection(object):
             spawn_model("mine_"+str(i), model, "", pose, "")
 
     def count_mines(self):
-        get_world_properties = rospy.ServiceProxy('gazebo/get_world_properties', GetWorldProperties)
+        rospy.wait_for_service('/gazebo/get_world_properties')
+        get_world_properties = rospy.ServiceProxy('/gazebo/get_world_properties', GetWorldProperties)
         world = get_world_properties().model_names
         mines = []
         for model_name in world:
-            if model_name[:6] == "WoodCu":
+            if model_name[:8] == "Landmine":
                 mines.append(model_name)
         self.mines=mines
         print("simulation started with: {} mines".format(len(mines)))
@@ -61,6 +67,7 @@ class mine_detection(object):
     def get_n_remaining_mines(self):
         return len(self.mines)
 
-if __name__ == '__main__':
+def main():
     x = mine_detection()
+    x.start_ros()
     x.run()

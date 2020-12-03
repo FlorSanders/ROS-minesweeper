@@ -1,0 +1,7 @@
+<launch>
+  <group ns="myturtlebot">
+    <node pkg="minesweeper_package" type="mine_detection" name="mine_detection"></node>
+
+    <!-- Additional nodes go above this line -->
+  </group>
+</launch>
