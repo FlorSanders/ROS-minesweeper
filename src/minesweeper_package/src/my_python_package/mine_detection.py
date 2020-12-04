@@ -3,7 +3,7 @@ import rospy
 import numpy as np
 from gazebo_msgs.srv import GetModelState, DeleteModel, SpawnModel, GetWorldProperties
 from geometry_msgs.msg import Pose
-
+from std_msgs.msg import Int16
 from my_python_package.abstract_turtle import AbstractTurtle
 
 
@@ -19,6 +19,10 @@ class mine_detection(AbstractTurtle):
         self.world_width = 10 #width of the minefield (x-axis)
         self.margin = 0.5 #margin between the walls and the minefield
         self.mines = [] #call count_mines() to add all mines from the minefield
+
+        #"""create topic and publisher"""
+
+        self.hit_publisher = rospy.Publisher('cleared_mines', Int16, queue_size=2)
 
     def run(self):
         """ main loop of the program """
@@ -36,8 +40,10 @@ class mine_detection(AbstractTurtle):
             mine_pos = np.array([mine_coords.x, mine_coords.y, mine_coords.z])
             if np.linalg.norm(robot_pos-mine_pos) < self._robot_radius + self._mine_radius:
                 remove_model(mine)
+
                 self.mines.remove(mine)
                 self.cleared_mines += 1
+                self.hit_publisher.publish(self.cleared_mines)
                 print("number of mines cleared: {}".format(self.cleared_mines))
 
     def spawn_mines(self):
