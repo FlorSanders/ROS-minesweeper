@@ -18,7 +18,7 @@ class SquareSpiral(RobotController):
     """
     Class implements a trajectory in which the robot drives in a square spiral, applying obstacle avoidance when needed
     """
-    def __init___(self, **params):
+    def __init__(self, **params):
         """
         Initialize the roomba.
         """

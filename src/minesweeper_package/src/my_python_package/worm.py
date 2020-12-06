@@ -19,14 +19,15 @@ class Worm(RobotController):
     Class implements a trajectory in which the robot goes to the top-right corner which then goes left, then goes to the next line.
     """
 
-    def __init___(self, **params):
+    def __init__(self, **params):
         """
-        Initialize the roomba.
+        Initialize the robot.
         """
         # Use the superclass initialization function
-        super(Worm, self).__init__(**params)
         self.states = ["Begin", "TopRightCorner", "WormLoopLeft", "WormLoopRight" ]
-        self.state = states[0]
+        self.state = self.states[0]
+        print(self.state)
+        super(Worm, self).__init__(**params)    
     
     def move(self):
         """
@@ -48,7 +49,7 @@ class Worm(RobotController):
     
         # Wait until sensor readings are available
         while (self.position is None or self.lds_ranges is None) and not ros.is_shutdown():
-            print('Sleeping...')
+            self.printd('Sleeping...')
             self.rate.sleep()
 
         # If these are available, move straight until blocked or unblock
