@@ -167,6 +167,7 @@ catkin_install_python(PROGRAMS
   nodes/open_loop_driver
   nodes/worm
   nodes/square_spiral
+  scripts/nodelauncher.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
