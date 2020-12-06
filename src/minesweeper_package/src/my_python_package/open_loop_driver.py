@@ -11,9 +11,7 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
-from my_python_package.abstract_turtle import AbstractTurtle
-
-
+from my_python_package.robot_controller import RobotController
 
 
 # Subclass of the robot controller that implements a square open loop driving move function
@@ -41,15 +39,11 @@ class OpenLoopDriver(RobotController):
         for i in range(4):
             self.go_forward_by(self.d, self.v)
             self.turn_by(self.alpha, self.omega)
-        self.turn_by(np.pi/2, 0.5)
         # Job is done -- Stopping the robot
         self.stop_robot()
 
-# First "minesweeper strategy": random movement with obstacle avoidance
-
-
-
-strategies = {
-    'squareloop': OpenLoopDriver,
-    'randomroomba': RandomRoomba,
-}
+# Starting the robot
+def main():
+    r = OpenLoopDriver()
+    r.start_ros()
+    r.move()
