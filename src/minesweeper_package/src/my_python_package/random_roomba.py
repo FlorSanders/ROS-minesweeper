@@ -25,27 +25,6 @@ class RandomRoomba(RobotController):
         """
         # Use the superclass initialization function
         super(RandomRoomba, self).__init__(**params)
-    
-    def scan_for_obstacles(self):
-        """
-        Uses the LDS to scan for obstacles that are in our path.
-        Returns whether we are close to an object (< 0.5m) as well as the full array of ranges.
-        """
-        # Fetching our ranges
-        ranges = np.array(list(self.lds_ranges))
-        
-        # If nothing is detected, the lds returns zero. Changing this by a long distance (4m)
-        ranges[ranges == 0.] = 4.
-        ranges[np.isinf(ranges)] = 4.
-
-        # Select ranges in the direction we are driving
-        relevant_ranges = np.concatenate((ranges[-12:], ranges[:12])) # Not too sure about these indices
-        blocked = np.any(relevant_ranges < self.thresh)
-        
-        self.printd((np.argmin(ranges), np.min(ranges), len(ranges), blocked))
-
-        # Return whether we are close to an object (within 0.5m) together with the whole range
-        return blocked, ranges
 
     def move(self):
         """
