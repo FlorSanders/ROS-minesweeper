@@ -165,7 +165,8 @@ catkin_install_python(PROGRAMS
   nodes/mine_detection
   nodes/random_roomba
   nodes/open_loop_driver
-  scripts/controller.py
+  nodes/worm
+  nodes/square_spiral
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

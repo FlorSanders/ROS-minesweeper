@@ -20,7 +20,7 @@ class RobotController(object):
     Abstracts away the declaration of ros messages and subscription to ros topics for the rest of the program
     """
 
-    def __init__(self, speed=0.5, angularspeed=np.pi/4, detectionthreshold=0.5, pubrate=0.1, duration=0.25, distance=1.0, angle=np.pi/2, debug=False):
+    def __init__(self, speed=0.5, angularspeed=np.pi/4, detectionthreshold=0.5, pubrate=0.1, duration=0.25, distance=1.0, angle=np.pi/2, debug=True):
         """"
         Initialization with definition for the subscribers and publishers as well as some general parameters and variables.
         """
@@ -60,6 +60,7 @@ class RobotController(object):
         Function that prints only if debug is active
         """
         if self.debug:
+            ros.loginfo(str(msg))
             print(str(msg))
 
     def start_ros(self):
@@ -94,6 +95,27 @@ class RobotController(object):
         
         sys.exit('The robot has been stopped.')
     
+    def scan_for_obstacles(self):
+        """
+        Uses the LDS to scan for obstacles that are in our path.
+        Returns whether we are close to an object (< 0.5m) as well as the full array of ranges.
+        """
+        # Fetching our ranges
+        ranges = np.array(list(self.lds_ranges))
+        
+        # If nothing is detected, the lds returns zero. Changing this by a long distance (4m)
+        ranges[ranges == 0.] = 4.
+        ranges[np.isinf(ranges)] = 4.
+
+        # Select ranges in the direction we are driving
+        relevant_ranges = np.concatenate((ranges[-12:], ranges[:12]))
+        blocked = np.any(relevant_ranges < self.thresh)
+        
+        self.printd((np.argmin(ranges), np.min(ranges), len(ranges), blocked))
+
+        # Return whether we are close to an object (within 0.5m) together with the whole range
+        return blocked, ranges
+
     def go_forward_for(self, tau=None, v=None):
         """
         Helper function to make the robot drive forward forward at speed v for a given duration tau
