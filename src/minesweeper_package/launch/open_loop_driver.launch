@@ -1,0 +1,7 @@
+<launch>
+  <group ns="myturtlebot">
+    <node pkg="minesweeper_package" type="open_loop_driver" name="open_loop_driver"></node>
+
+    <!-- Additional nodes go above this line -->
+  </group>
+</launch>

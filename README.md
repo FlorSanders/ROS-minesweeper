@@ -24,45 +24,37 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
   source /opt/ros/noetic/setup.bash
   source ~/Group-8/devel/setup.bash
   export TURTLEBOT3_MODEL=burger
+  export GAZEBO_MODEL_PATH=~/Group-8/src/minesweeper_package/gazebo_models:${GAZEBO_MODEL_PATH}
   ```
+  Note: the `export GAZEBO_MODEL_PATH=~$(ROBOTICS_PATH)/src/minesweeper_package/gazebo_models:${GAZEBO_MODEL_PATH}` command points towards the newly created Gazebo models and links them.
 
 - Source bashrc. `source ~/.bashrc`.
 
 - Change directory to this repository. `cd ~/Group-8/`.
 
 - Build the source. `catkin_make`.
+
 ## General Usage
  1. Go to the working directory of the project
  1. execute `catkin_make && source devel/setup.bash && roscore`
  1. Bring up gazebo `roslaunch turtlebot3_gazebo <launchfile.launch>`
       * Launchfiles: 
-        * minefield.launch
-        * turtlebot3_minesweeping.launch
+        * 0_BasicMinefield.launch
+        * 1_BasicMinefield_Small.launch
+        * 2_EnhancedMinefield_Test.launch
+        * 3_EnhancedMinefield_Small.launch
+      * Problems with your graphics card? Execute: `export SVGA_VGPU10=0`
  1. Steer the robot: `roslaunch minesweeper_package <launchfile.launch>`
       * launchfiles: 
         * controller.py randomroomba
         * my_launch_file.launch
-## Usage
+        
+## Testing
 - Launch a world in the gazebo simulator along with a turtlebot: E.g. `roslaunch turtlebot3_gazebo turtlebot3_world.launch`.
 - Launch rviz to visualize the readings of the turtlebot while operating: `roslaunch turtlebot3_fake turtlebot3_fake.launch`.
 - Launch one of the available minesweeping strategies: E.g. `rosrun minesweeper_package controller.py randomroomba`.
   - Options: `squareloop/randomroomba`.
 - Launch the scripts from lab session 3: `roslaunch minesweeper_package my_launch_file.launch`.
-- Enjoy!
-## Setup of The New World(s)
-- Link the model folder
-  ```
-  echo  'export GAZEBO_MODEL_PATH=~$(ROBOTICS_PATH)/src/minesweeper_package/gazebo_models:${GAZEBO_MODEL_PATH}' >> ~/.bahsrc
-  source ~/.bashrc
-  ```
-- Launch gazebo
-  
-  ```
-  roscore
-  roslaunch turtlebot3_gazebo minefield.launch
-  roslaunch turtlebot3_gazebo smallminefield.launch
-  roslaunch turtlebot3_gazebo turtlebot3_minesweeping.launch
-  ```
 
 ## Report
 
@@ -73,5 +65,7 @@ Overleaf report-link: https://www.overleaf.com/8928521917hdmphszkkkrj
 - Official ROS tutorials: http://wiki.ros.org/ROS/Tutorials
 - Turtlebot tutorials: https://learn.turtlebot.com/
 - Gazebo & roslaunch tutorial: http://gazebosim.org/tutorials?tut=ros_roslaunch&cat=connect_ros
+- Gazebo colors and textures tutorial: http://gazebosim.org/tutorials?tut=color_model
+- Gazebo populations tutorial: http://gazebosim.org/tutorials?tut=model_population&cat=build_world
 - Launch turtlebot3 simulations with ros: https://automaticaddison.com/how-to-launch-the-turtlebot3-simulation-with-ros/
 - ROS navigation stack tutorials: https://www.youtube.com/watch?v=5nZc5iSr5is

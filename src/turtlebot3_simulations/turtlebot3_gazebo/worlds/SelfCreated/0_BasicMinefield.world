@@ -1,3 +1,4 @@
+<?xml version="1.0" ?>
 <sdf version='1.7'>
   <world name='default'>
 
@@ -10,8 +11,8 @@
     </include>
 
     <include>
-        <uri>model://smallminefield</uri>
-        <name>smallminefield</name>
+        <uri>model://minefield</uri>
+        <name>minefield</name>
     </include>
 
     <population name="mines">
@@ -23,9 +24,9 @@
       </model>
       <pose>0 0 -0.125 0 0 0</pose>
       <box>
-        <size>5 4.5 0.0001</size>
+        <size>9 4.5 0.0001</size>
       </box>
-      <model_count>30</model_count>
+      <model_count>50</model_count>
       <distribution>
         <type>random</type>
       </distribution>
