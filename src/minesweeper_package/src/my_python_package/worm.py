@@ -26,7 +26,6 @@ class Worm(RobotController):
         # Use the superclass initialization function
         self.states = ["Begin", "TopRightCorner", "WormLoopLeft", "WormLoopRight" ]
         self.state = self.states[0]
-        print(self.state)
         super(Worm, self).__init__(**params)    
     
     def move(self):
