@@ -1,5 +1,6 @@
 #!/usr/bin.env python
 
+# Importing required libraries
 import rospy as ros
 import time
 import sys
@@ -59,7 +60,7 @@ class RobotController(object):
         Function that prints only if debug is active
         """
         if self.debug:
-            print(msg)
+            print(str(msg))
 
     def start_ros(self):
         """

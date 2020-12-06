@@ -2,8 +2,6 @@
 
 from my_python_package.mine_detection import *
 
-
-
 # Run the open loop driver if this script is called
 if __name__  == "__main__":
     # Helper library that parses command line option

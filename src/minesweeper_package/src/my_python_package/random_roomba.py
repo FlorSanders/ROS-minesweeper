@@ -75,6 +75,8 @@ class RandomRoomba(RobotController):
                 self.turn_by(alpha=random_choice, omega=self.omega)
             else:
                 self.go_forward_for(tau=self.tau, v=self.v)
+
+# Starting the robot
 def main():
     r = RandomRoomba()
     r.start_ros()
