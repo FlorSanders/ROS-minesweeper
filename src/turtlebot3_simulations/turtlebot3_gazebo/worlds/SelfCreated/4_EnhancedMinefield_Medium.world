@@ -252,7 +252,7 @@
       <model name="Landmine">
         <include>
           <static>true</static>
-          <uri>model://Landmine_0-018x0-005</uri>
+          <uri>model://Landmine_0-018x0-005_Red</uri>
         </include>
       </model>
       <pose>4 3.5 0 0 0 0</pose>

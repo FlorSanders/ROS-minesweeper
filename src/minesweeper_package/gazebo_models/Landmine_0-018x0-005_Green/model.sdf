@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <sdf version='1.7'>
   
-  <model name='Landmine_0-018x0-005'>
+  <model name='Landmine_0-018x0-005_Green'>
     <pose>0 0 0 0 -0 0</pose>
     <link name='Landmine'>
     <!--No collision tag to make sure the mine does not interfere with robot-->
@@ -17,7 +17,7 @@
           <ambient>0 0 0 1</ambient>
           <diffuse>0 0 0 1</diffuse>
           <specular>0 0 0 0</specular>
-          <emissive>1 0 0 1</emissive>
+          <emissive>0 1 0 1</emissive>
         </material>
         <meta>
           <layer>0</layer>

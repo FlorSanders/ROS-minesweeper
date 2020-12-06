@@ -1,0 +1,30 @@
+<?xml version='1.0'?>
+<sdf version='1.7'>
+  
+  <model name='Landmine_0-018x0-005_Red'>
+    <pose>0 0 0 0 -0 0</pose>
+    <link name='Landmine'>
+    <!--No collision tag to make sure the mine does not interfere with robot-->
+      <visual name='Landmine_Visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+		<cylinder>
+   			 <radius>0.018</radius>
+   			 <length>0.005</length>
+ 		</cylinder>
+        </geometry>
+        <material>
+          <ambient>0 0 0 1</ambient>
+          <diffuse>0 0 0 1</diffuse>
+          <specular>0 0 0 0</specular>
+          <emissive>1 0 0 1</emissive>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>0 0 0 0 -0 0</pose>
+    </link>
+    <static>true</static>
+  </model>
+</sdf>
