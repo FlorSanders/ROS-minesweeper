@@ -2,6 +2,18 @@
 <sdf version='1.7'>
   <world name='Minesweeping'>
   
+<!--Settings-->
+<!--***************************************************************************************--> 
+  
+    <physics type="ode">
+      <real_time_update_rate>0</real_time_update_rate>   <!-- Running at max speed! -->
+      <ode>
+        <solver>
+          <iters>30</iters> <!-- Decreasing accuracy for hardware reasons -->
+        </solver>
+      </ode>
+    </physics>
+  
 <!--Environment-->
 <!--***************************************************************************************-->
     <include>
@@ -118,7 +130,7 @@
           <uri>model://Landmine_0-018x0-005_Red</uri>
         </include>
       </model>
-      <pose>3 2.5 0 0 0 0</pose>
+      <pose>3 2.5 0.01 0 0 0</pose>
       <box>
         <size>6 5 0.01</size>
       </box>
