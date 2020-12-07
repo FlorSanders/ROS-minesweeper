@@ -1,6 +1,7 @@
 #! /usr/bin/env pyhon
 import rospy
 import numpy as np
+from time import sleep
 from gazebo_msgs.srv import GetModelState, DeleteModel, SpawnModel, GetWorldProperties
 from geometry_msgs.msg import Pose
 from std_msgs.msg import Int16
@@ -20,15 +21,21 @@ class mine_detection(AbstractTurtle):
         self.margin = 0.5 #margin between the walls and the minefield
         self.mines = [] #call count_mines() to add all mines from the minefield
 
-        #"""create topic and publisher"""
-
+        #create topic and publisher
         self.hit_publisher = rospy.Publisher('cleared_mines', Int16, queue_size=2)
 
+        #log the number of cleared mines
+        self.log = open("/home/lander/Desktop/Robotics/Group-8/src/minesweeper_package/log/stats.txt", "w")
+        self.log.write("time;count;mine_x;mine_y;mine_z;\n")
+
+
     def run(self):
+        
         """ main loop of the program """
         self.count_mines()
         while not rospy.is_shutdown():
                 self.scan_mines()
+        self.log.close()
 
     def scan_mines(self):
         get_coordinates = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
@@ -40,11 +47,11 @@ class mine_detection(AbstractTurtle):
             mine_pos = np.array([mine_coords.x, mine_coords.y, mine_coords.z])
             if np.linalg.norm(robot_pos-mine_pos) < self._robot_radius + self._mine_radius:
                 remove_model(mine)
-
                 self.mines.remove(mine)
                 self.cleared_mines += 1
                 self.hit_publisher.publish(self.cleared_mines)
-                print("number of mines cleared: {}".format(self.cleared_mines))
+                self.log.write(str(1) + ";" + str(self.cleared_mines) + ";" + str(mine_coords.x) + ";" + str(mine_coords.y)  + ";" + str(mine_coords.z) + "\n")
+        sleep(0.05)
 
     def spawn_mines(self):
         f = open('/home/lander/Desktop/Robotics/Group-8/src/minesweeper_package/gazebo_models/coke_can/model.sdf','r')
