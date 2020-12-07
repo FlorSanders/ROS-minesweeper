@@ -6,6 +6,7 @@ import time
 import sys
 import numpy as np
 import argparse
+import random
 
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
@@ -51,7 +52,7 @@ class SquareSpiral(RobotController):
                 # Turning to the direction of freedom
                 self.turn_by(alpha=random_choice, omega=self.omega)
                 # Recursive call to this function to drive us away from the current obstacle without running into a new one
-                self.goForwardUnlessBlocked(5) # This is a parameter we could play with... How far away from 
+                self.goForwardUnlessBlocked(random.randint(3, 7)) # Generates a number to deterinate how far it goes 
                 # Break away from the loop
                 break
             else:
