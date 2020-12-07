@@ -2,23 +2,8 @@
 <sdf version='1.7'>
   <world name='Minesweeping'>
   
-<!--Settings-->
-<!--***************************************************************************************--> 
-  
-    <physics type="ode">
-      <real_time_update_rate>0</real_time_update_rate>   <!-- Running at max speed! -->
-      <ode>
-        <solver>
-          <iters>30</iters> <!-- Decreasing accuracy for hardware reasons -->
-        </solver>
-      </ode>
-    </physics>
-  
 <!--Environment-->
 <!--***************************************************************************************-->
-    
-    
-    
     <include>
       <uri>model://sun</uri>
     </include>
@@ -61,6 +46,25 @@
       </distribution>
     </population>
     
+    <population name="GrassPlane3">
+      <model name="Grass3">
+        <include>
+          <static>true</static>
+          <uri>model://grass_plane_1x1</uri>
+        </include>
+      </model>
+      <pose>-1 1.25 0 0 0 0</pose>
+      <box>
+        <size>2 3 0.01</size> <!-- Note: There will be grass below a wall -->
+      </box>
+      <distribution>
+        <type>grid</type>
+        <rows>3</rows>
+        <cols>2</cols>
+        <step>1 1 0</step>
+      </distribution>
+    </population>
+    
     <population name="AsphaltPlane">
       <model name="Asphalt">
         <include>
@@ -90,11 +94,11 @@
           <uri>model://brick_wall_0-5x0-25x0-5</uri>
         </include>
       </model>
-      <pose>0.5 0 0 0 0 0</pose>
+      <pose>-0.5 0 0 0 0 0</pose>
       <box>
-        <size>1 1 0.01</size>
+        <size>3 1 0.01</size>
       </box>
-      <model_count>2</model_count>
+      <model_count>6</model_count>
       <distribution>
         <type>linear-x</type>
       </distribution>
@@ -159,11 +163,11 @@
           <pose>0 0 0 0 0 1.570796</pose>
         </include>
       </model>
-      <pose>-0.25 3 0 0 0 0</pose>
+      <pose>-0.25 4.5 0 0 0 0</pose>
       <box>
-        <size>1 6.5 0.01</size>
+        <size>1 3.5 0.01</size>
       </box>
-      <model_count>13</model_count>
+      <model_count>7</model_count>
       <distribution>
         <type>linear-y</type>
       </distribution>
@@ -182,6 +186,41 @@
         <size>1 6.5 0.01</size>
       </box>
       <model_count>13</model_count>
+      <distribution>
+        <type>linear-y</type>
+      </distribution>
+    </population>
+    
+    <population name="Wall5">
+      <model name="Wall5">
+        <include>
+          <static>true</static>
+          <uri>model://brick_wall_0-5x0-25x0-5</uri>
+        </include>
+      </model>
+      <pose>-1 2.75 0 0 0 0</pose>
+      <box>
+        <size>2 1 0.01</size>
+      </box>
+      <model_count>4</model_count>
+      <distribution>
+        <type>linear-x</type>
+      </distribution>
+    </population>
+    
+    <population name="Wall6">
+      <model name="Wall6">
+        <include>
+          <static>true</static>
+          <uri>model://brick_wall_0-5x0-25x0-5</uri>
+          <pose>0 0 0 0 0 1.570796</pose>
+        </include>
+      </model>
+      <pose>-2.25 1.25 0 0 0 0</pose>
+      <box>
+        <size>1 3 0.01</size>
+      </box>
+      <model_count>6</model_count>
       <distribution>
         <type>linear-y</type>
       </distribution>
@@ -242,21 +281,29 @@
           <pose>0 0 0 0 0 0</pose>
         </include>
       </model>
-      <pose>3 3.5 0 0 0 0</pose>
+      <pose>2 3.5 0 0 0 0</pose>
       <box>
         <size>1 5 0.01</size>
       </box>
-      <model_count>5</model_count>
+      <model_count>4</model_count>
       <distribution>
         <type>linear-y</type>
       </distribution>
     </population>
+    
+    <model name="Fountain">
+        <include>
+         <uri>model://fountain_small</uri>
+         <pose>-0.5 1.25 0 0 0 0</pose>
+         <static>true</static>
+        </include>
+     </model>
 
 
 <!--Mines-->
 <!--***************************************************************************************-->
     <population name="RandomlyDistributedMines">
-      <model name="Landmine">
+      <model name="LandmineArea1">
         <include>
           <static>true</static>
           <uri>model://Landmine_0-018x0-005_Red</uri>
@@ -266,10 +313,28 @@
       <box>
         <size>7 6 0.01</size>
       </box>
-      <model_count>40</model_count>
+      <model_count>35</model_count>
       <distribution>
         <type>random</type>
       </distribution>
     </population>
+    
+    <population name="RandomlyDistributedMines2">
+      <model name="LandmineArea2">
+        <include>
+          <static>true</static>
+          <uri>model://Landmine_0-018x0-005_Red</uri>
+        </include>
+      </model>
+      <pose>-1 1.25 0.01 0 0 0</pose>
+      <box>
+        <size>2 2.5 0.01</size>
+      </box>
+      <model_count>5</model_count>
+      <distribution>
+        <type>random</type>
+      </distribution>
+    </population>
+     
   </world>
 </sdf>
