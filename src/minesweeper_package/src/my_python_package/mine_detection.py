@@ -1,6 +1,7 @@
 #! /usr/bin/env pyhon
 import rospy
 import numpy as np
+import os
 from time import sleep
 from gazebo_msgs.srv import GetModelState, DeleteModel, SpawnModel, GetWorldProperties
 from geometry_msgs.msg import Pose
@@ -24,9 +25,18 @@ class mine_detection(AbstractTurtle):
         #create topic and publisher
         self.hit_publisher = rospy.Publisher('cleared_mines', Int16, queue_size=2)
 
+        #retrieve the path to the working directory of the project
+        root = os.environ.get("ROBOTICS_PROJECT_DIR")
+        root = os.path.expanduser(root)
+
         #log the number of cleared mines
-        self.log = open("/home/lander/Desktop/Robotics/Group-8/src/minesweeper_package/log/stats.txt", "w")
-        self.log.write("time;count;mine_x;mine_y;mine_z;\n")
+        self.log = open(os.path.join(root, "src/minesweeper_package/log/stats.txt"), "w")
+        self.log.write("time;count;mine_x;mine_y;mine_z;robot_x;robot_y;robot_z\n")
+
+        #open the model of the green green mines
+        model = open(os.path.join(root + "src/minesweeper_package/gazebo_models/Landmine_0-018x0-005_Green/model.sdf"), "r")
+        self.green_mine_model = model.read()
+        model.close()
 
 
     def run(self):
@@ -43,15 +53,23 @@ class mine_detection(AbstractTurtle):
         robot_coords = get_coordinates("turtlebot3_burger", "").pose.position
         robot_pos = np.array([robot_coords.x, robot_coords.y, robot_coords.z])
         for mine in self.mines:
-            mine_coords = get_coordinates(mine, "" ).pose.position
+            mine_pose = get_coordinates(mine, "" ).pose
+            mine_coords = mine_pose.position
             mine_pos = np.array([mine_coords.x, mine_coords.y, mine_coords.z])
             if np.linalg.norm(robot_pos-mine_pos) < self._robot_radius + self._mine_radius:
                 remove_model(mine)
                 self.mines.remove(mine)
+                self.spwan_green_mine(mine_pose)
                 self.cleared_mines += 1
                 self.hit_publisher.publish(self.cleared_mines)
-                self.log.write(str(1) + ";" + str(self.cleared_mines) + ";" + str(mine_coords.x) + ";" + str(mine_coords.y)  + ";" + str(mine_coords.z) + "\n")
-        sleep(0.05)
+                self.log.write(str(rospy.get_time()) + ";" + str(self.cleared_mines) + ";" + str(mine_coords.x) + ";" + str(mine_coords.y)  + ";" + str(mine_coords.z) + ";"
+                    + str(robot_coords.x) + ";" + str(robot_coords.y) + ";" + str(robot_coords.z) + "\n")
+        sleep(0.1)
+    
+    def spwan_green_mine(self, pose):
+        rospy.wait_for_service('/gazebo/spawn_sdf_model')
+        spawn_model = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
+        spawn_model("cleared_mine_" + str(self.cleared_mines), self.green_mine_model, "", pose, "")
 
     def spawn_mines(self):
         f = open('/home/lander/Desktop/Robotics/Group-8/src/minesweeper_package/gazebo_models/coke_can/model.sdf','r')
