@@ -24,9 +24,24 @@ class Worm(RobotController):
         Initialize the robot.
         """
         # Use the superclass initialization function
-        self.states = ["Begin", "TopRightCorner", "WormLoopLeft", "WormLoopRight" ]
-        self.state = self.states[0]
+        self.state = "Begin"
         super(Worm, self).__init__(**params)    
+    
+    def goForwardUntilBlocked(self):
+        """
+        Goes forward for {it} times the default duration unless it detects an obstacle,
+        in which case it turns away from the obstacle and drives to a new region.
+        """
+        # Go forward, until we're blocked
+        while(True):
+            # Check if we're blocked
+            blocked, ranges = self.scan_for_obstacles()
+            if blocked:
+                # Once we're blocked, return
+                return
+            else:
+                # As long as we're not blocked, move forward
+                self.go_forward_by(0.1)
     
     def move(self):
         """
@@ -36,44 +51,40 @@ class Worm(RobotController):
             3.1 Drives to the left wall.
             3.2. Drives to the right wall.
         """
-        def goDown():
-            if self.state == self.states[2]:
-                self.turn_by(np.pi/2, 0.5)
-                self.go_forward_by(self.d, self.v)
-                self.turn_by(-np.pi/2, 0.5)
-            elif self.state == self.states[3]:
-                self.turn_by(-np.pi/2, 0.5)
-                self.go_forward_by(self.d, self.v)
-                self.turn_by(np.pi/2, 0.5)
-    
         # Wait until sensor readings are available
         while (self.position is None or self.lds_ranges is None) and not ros.is_shutdown():
             self.printd('Sleeping...')
             self.rate.sleep()
 
-        # If these are available, move straight until blocked or unblock
         while not ros.is_shutdown():
             (blocked, _) = self.scan_for_obstacles()
-            if self.state == self.states[0]:        # rotate 45 degrees and go forward
-                self.turn_by(np.pi/4, self.v)
-                self.state = self.states[1]
-
-            elif self.state == self.states[1]:  # keep going forward until blocked
+            # Begin strategy
+            if self.state == "Begin":
+                self.goForwardUntilBlocked()
+                self.turn_by(np.pi/2)
+                self.state = "WormLoopLeft"
+            # Just turned left
+            elif self.state == "WormLoopLeft":
+                self.goForwardUntilBlocked()
+                self.turn_by(np.pi/2)
+                # We shouldn't be blocked by this point
                 if blocked:
-                    self.turn_by(-135*np.pi/180, self.v)
-                    self.state = self.states[2]
-                else:     
-                    self.go_forward_by(self.d, self.v)
-            elif self.state == self.states[2]:  # rotate 180 degrees and go forward
-                self.go_forward_by(self.d, self.v)
+                    self.turn_by(np.pi/4)
+                else:
+                    self.go_forward_by(0.1)
+                    self.turn_by(np.pi/2)
+                    self.state = "WormLoopRight"
+            # Just turned right
+            elif self.state == "WormLoopRight":
+                self.goForwardUntilBlocked()
+                self.turn_by(-np.pi/2)
+                # We shouldn't be blocked by this point
                 if blocked:
-                    goDown()
-                    self.state = self.states[3]
-            elif self.state == self.states[3]:  # rotate 180 degrees and go forward
-                self.go_forward_by(self.d, self.v)
-                if blocked:              
-                    goDown()
-                    self.state = self.states[2]
+                    self.turn_by(np.pi/4)
+                else:
+                    self.go_forward_by(0.1)
+                    self.turn_by(-np.pi/2)
+                    self.state = "WormLoopLeft"
 
 # Starting the robot
 def main():
