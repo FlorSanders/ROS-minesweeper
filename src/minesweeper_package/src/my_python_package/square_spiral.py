@@ -38,7 +38,7 @@ class SquareSpiral(RobotController):
             if blocked:
                 self.printd("Obstacle detected")
                 # Picking out the directions that are not actually blocked
-                unblocked_directions = np.concatenate([np.linspace(0, np.pi, len(ranges)/2), np.linspace(-np.pi, 0, len(ranges)/2)])[ranges >= self.thresh]
+                unblocked_directions = np.concatenate([np.linspace(0, np.pi, len(ranges)//2), np.linspace(-np.pi, 0, len(ranges)//2)])[ranges >= self.thresh]
                 # Making a probability distribution such that directions without any obstructions are more likely to be chosen
                 probs = np.exp(ranges[ranges >= self.thresh])
                 try:
