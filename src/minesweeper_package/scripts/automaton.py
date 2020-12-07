@@ -37,7 +37,7 @@ def launch_simulation(strategy, environment, duration=30, repetitions=10):
         driver_launcher = roslaunch.parent.ROSLaunchParent(uuid, [driver_path])
         # Launch the gazebo world and wait a couple of seconds
         gazebo_launcher.start()
-        time.sleep(5)
+        time.sleep(10) # Could be too short if launching LARGE worlds... Dunno
 
         # Launch the robot and sleep until it's shutdown time
         driver_launcher.start()
