@@ -56,6 +56,41 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
   - Options: `squareloop/randomroomba`.
 - Launch the scripts from lab session 3: `roslaunch minesweeper_package my_launch_file.launch`.
 
+## Collecting statistics
+
+Repeated simulations for a world and strategy of choice can be launched through: `rosrun minesweeper_package automaton.py [strategy] [environment]`.
+
+More information for arguments and options can be obtained using `rosrun minesweeper_package automaton.py --help`, which prints:
+
+```bash
+automaton.py [-h] [--duration [DURATION]] [--repetitions [REPETITIONS]]
+                    [--debug]
+                    strategy environment
+
+Automatically run simulations one after the other
+
+positional arguments:
+  strategy              Which minesweeping strategy to launch. Options:
+                        [random_roomba/worm/square_spiral]
+  environment           Which environment to launch in the gazebo simulator.
+                        Options: [0_BasicMinefield/1_BasicMinefield_Small/2_En
+                        hancedMinefield_Test/3_EnhancedMinefield_Small/4_Enhan
+                        cedMinefield_Medium/5_EnhancedMinefield_Large]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --duration [DURATION]
+                        How long (in minutes) each simulation will run for (in
+                        simulated time).
+  --repetitions [REPETITIONS]
+                        The total amount of times the simulation should be
+                        repeated.
+  --debug               Should debug messages be printed?
+
+```
+
+
+
 ## Report
 
 Overleaf report-link: https://www.overleaf.com/8928521917hdmphszkkkrj
