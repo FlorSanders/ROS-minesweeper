@@ -45,17 +45,11 @@ class Worm(RobotController):
     
     def move(self):
         """
-        1. Wait until readings from the sensor are available.
-        2. Drives to the right-top corner.  
-        3. Loop
-            3.1 Drives to the left wall.
-            3.2. Drives to the right wall.
+        1. Drives to the right-top corner.  
+        2. Loop
+            2.1 Drives to the left wall.
+            2.2. Drives to the right wall.
         """
-        # Wait until sensor readings are available
-        while (self.position is None or self.lds_ranges is None) and not ros.is_shutdown():
-            self.printd('Sleeping...')
-            self.rate.sleep()
-
         while not ros.is_shutdown():
             (blocked, _) = self.scan_for_obstacles()
             # Begin strategy

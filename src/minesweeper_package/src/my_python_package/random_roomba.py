@@ -28,15 +28,9 @@ class RandomRoomba(RobotController):
 
     def move(self):
         """
-        1. Wait until readings from the sensor are available.
-        2. Moves straight until the sensor detects possible collision.
-        3. Turns towards an unblocked direction and continues.
+        1. Moves straight until the sensor detects possible collision.
+        2. Turns towards an unblocked direction and continues.
         """
-        # Wait until sensor readings are available
-        while (self.position is None or self.lds_ranges is None) and not ros.is_shutdown():
-            self.printd('Sleeping...')
-            self.rate.sleep()
-
         # If these are available, move straight until blocked or unblock
         while not ros.is_shutdown():
             blocked, ranges = self.scan_for_obstacles()

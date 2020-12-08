@@ -2,10 +2,8 @@
 
 # Importing required libraries
 import rospy as ros
-import time
 import sys
 import numpy as np
-import argparse
 
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
@@ -80,6 +78,11 @@ class RobotController(object):
         self.odom_sub = ros.Subscriber(self.odom_sub_name, Odometry, callback=self.__odom_ros_sub, queue_size=self.queue_size)
         self.lds_sub = ros.Subscriber(self.lds_sub_name, LaserScan, callback=self.__lds_ros_sub, queue_size=self.queue_size)
         self.vel_pub = ros.Publisher(self.vel_pub_name, Twist, queue_size=self.queue_size)
+
+        # Wait for the first messages to arrive
+        while any([msg is None for msg in [self.position, self.orientation, self.lds_ranges]]) and not ros.is_shutdown():
+            self.printd('Sleeping...')
+            self.rate.sleep()
         
     def stop_robot(self):
         """
@@ -87,9 +90,9 @@ class RobotController(object):
         Publishes a stop command to the robot for a secod before shutting down.
         """
 
-        self.t_init = time.time()
+        self.t_init = ros.get_time()
     
-        while time.time() - self.t_init < 1 and not ros.is_shutdown():
+        while ros.get_time() - self.t_init < 1 and not ros.is_shutdown():
             self.__vel_ros_pub(Twist())
             self.rate.sleep()
         
