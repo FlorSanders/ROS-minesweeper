@@ -2,16 +2,10 @@
 
 # Importing the require libraries
 import rospy as ros
-import time
 import sys
 import numpy as np
-import argparse
 import random
 
-from geometry_msgs.msg import Twist
-from nav_msgs.msg import Odometry
-from sensor_msgs.msg import LaserScan
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from my_python_package.robot_controller import RobotController
 
 # Third "minesweeper strategy": random movement with obstacle avoidance
