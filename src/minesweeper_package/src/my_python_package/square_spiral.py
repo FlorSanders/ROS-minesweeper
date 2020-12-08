@@ -75,11 +75,6 @@ class SquareSpiral(RobotController):
         """
         Moves in a square spiral pattern until it detects an object in the way, in which case it moves away from that object and starts over
         """
-        # Wait until sensor readings are available
-        while (self.position is None or self.lds_ranges is None) and not ros.is_shutdown():
-            print('Sleeping...')
-            self.rate.sleep()
-
         self.it = 0
         # If these are available, move straight until blocked or unblock
         while not ros.is_shutdown():
