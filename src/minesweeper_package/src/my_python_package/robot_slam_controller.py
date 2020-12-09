@@ -13,7 +13,7 @@ from sensor_msgs.msg import LaserScan
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
 
-# Most generic abstract class to handle ROS publishing and subscribing
+# Most generic abstract class to handle ROS publishing and subscribing, making use of SLAM map data and the navigation stack in order to move around
 # Add all available sensors and algorithms to this thing and make subclasses which define the move funcion and achieve greatness
 class RobotSlamController(object):
     """
@@ -21,7 +21,7 @@ class RobotSlamController(object):
     Abstracts away the declaration of ros messages and subscription to ros topics for the rest of the program
     """
 
-    def __init__(self, speed=0.5, angularspeed=np.pi/4, detectionthreshold=0.5, pubrate=0.05, duration=0.1, distance=1.0, angle=np.pi/2, debug=True):
+    def __init__(self, debug=True):
         """"
         Initialization with definition for the subscribers and publishers as well as some general parameters and variables.
         """
@@ -29,12 +29,9 @@ class RobotSlamController(object):
         self.node_name = "robot_slam_controller"
         # ROS subscription and publication topics
         self.odom_sub_name = "/odom"
-        self.lds_sub_name = "/scan"
         self.map_sub_name = "/map"
-        self.vel_pub_name = "/cmd_vel"
         # Rose subscribers and publishers
         self.odom_sub = None
-        self.lds_sub = None
         self.map_sub = None
         self.vel_pub = None
 
@@ -42,26 +39,17 @@ class RobotSlamController(object):
         self.transformer = None
 
         # Ros parameters
-        self.pub_rate = pubrate
+        self.pub_rate = 0.05
         self.queue_size = 2
 
         # Variables to store sensor information in
         self.position = None
         self.orientation = None
-        self.lds_ranges = None
         self.map = None
         self.map_dim = None
         self.map_res = None
         self.map_origin = None
         self.map_time = None
-
-        # Velocity, distance and timing parameters
-        self.tau = duration
-        self.v = speed
-        self.omega = angularspeed
-        self.alpha = angle
-        self.d = distance
-        self.thresh = detectionthreshold
 
         # Debugging option
         self.debug = debug
@@ -88,7 +76,6 @@ class RobotSlamController(object):
 
         # Subscribers and publishers
         self.odom_sub = ros.Subscriber(self.odom_sub_name, Odometry, callback=self.__odom_ros_sub, queue_size=self.queue_size)
-        self.lds_sub = ros.Subscriber(self.lds_sub_name, LaserScan, callback=self.__lds_ros_sub, queue_size=self.queue_size)
         self.map_sub = ros.Subscriber(self.map_sub_name, OccupancyGrid, callback=self.__map_ros_sub, queue_size=self.queue_size)
         self.vel_pub = ros.Publisher(self.vel_pub_name, Twist, queue_size=self.queue_size)
 
@@ -113,119 +100,6 @@ class RobotSlamController(object):
             self.rate.sleep()
         
         sys.exit('The robot has been stopped.')
-    
-    def scan_for_obstacles(self):
-        """
-        Uses the LDS to scan for obstacles that are in our path.
-        Returns whether we are close to an object (< 0.5m) as well as the full array of ranges.
-        """
-        # Fetching our ranges
-        ranges = np.array(list(self.lds_ranges))
-        
-        # If nothing is detected, the lds returns zero. Changing this by a long distance (4m)
-        ranges[ranges == 0.] = 4.
-        ranges[np.isinf(ranges)] = 4.
-
-        # Select ranges in the direction we are driving
-        relevant_ranges = np.concatenate((ranges[-12:], ranges[:12]))
-        blocked = np.any(relevant_ranges < self.thresh)
-        
-        self.printd((np.argmin(ranges), np.min(ranges), len(ranges), blocked))
-
-        # Return whether we are close to an object (within 0.5m) together with the whole range
-        return blocked, ranges
-
-    def go_forward_for(self, tau=None, v=None):
-        """
-        Helper function to make the robot drive forward forward at speed v for a given duration tau
-        """
-        # If no arguments are given, set default values
-        if tau == None:
-            tau = self.tau
-        if v == None:
-            v = self.v
-
-        # Set the initial time
-        self.t_init = ros.get_time()
-        
-        # While we don't go over duration, move forward
-        msg = Twist()
-        while ros.get_time() - self.t_init < tau and not ros.is_shutdown():
-            msg.linear.x = v
-            msg.angular.z = 0
-            self.__vel_ros_pub(msg)
-            self.rate.sleep()
-
-    def go_forward_by(self, d=None, v=None):
-        """
-        Helper function to make the robot drive forward a certain distance at a given speed v
-        """
-        # If no arguments are given, set default values
-        if d == None:
-            d = self.d
-        if v == None:
-            v = self.v
-
-        # Get the initial position
-        x_init = self.position.x
-        y_init = self.position.y
-
-        # Move by the amount we wanted to move by
-        msg = Twist()
-        while (self.position.x - x_init)**2 + (self.position.y - y_init)**2 < d**2 and not ros.is_shutdown():
-            msg.linear.x = v
-            msg.angular.z = 0
-            self.__vel_ros_pub(msg)
-            self.rate.sleep()
-
-    def get_z_rotation(self, orientation):
-        """
-        Calculates the current z-angle based on     
-        """
-        (_, _, yaw) = tf.transformations.euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
-        return yaw
-    
-    def turn_for(self, tau=None, omega=None):
-        """
-        Helper function to make the robot turn at angular speed omega for a given duration tau
-        """
-        # If no arguments are given, set default values
-        if tau == None:
-            tau = self.tau
-        if omega == None:
-            omega = self.omega
-
-        # Set the initial time
-        self.t_init = ros.get_time()
-
-        # While we don't go over duration, turn
-        msg = Twist()
-        while ros.get_time() - self.t_init < tau and not ros.is_shutdown():
-            msg.linear.x = 0
-            msg.angular.z = omega
-            self.__vel_ros_pub(msg)
-            self.rate.sleep()
-
-    def turn_by(self, alpha=None, omega=None):
-        """
-        Helper function to make the robot turn by a certain angle at a given angular speed omega
-        """
-        # If no arguments are given, set default values
-        if alpha == None:
-            alpha = self.alpha
-        if omega == None:
-            omega = self.omega
-
-        # Get the initial angle
-        alpha_init = self.get_z_rotation(self.orientation)
-
-        # Move by the angle we wanted to move by
-        msg = Twist()
-        while abs(self.get_z_rotation(self.orientation) - alpha_init) < abs(alpha) and not ros.is_shutdown():
-            msg.angular.z = np.sign(alpha)*omega
-            msg.linear.x = 0
-            self.__vel_ros_pub(msg)
-            self.rate.sleep()
         
     def move(self):
         """
@@ -241,12 +115,6 @@ class RobotSlamController(object):
         """
         self.position = msg.pose.pose.position
         self.orientation = msg.pose.pose.orientation
-    
-    def __lds_ros_sub(self, msg):
-        """
-        Handles subscription for the Light Distance Sensor topic.
-        """
-        self.lds_ranges = msg.ranges
     
     def __map_ros_sub(self, msg):
         """
