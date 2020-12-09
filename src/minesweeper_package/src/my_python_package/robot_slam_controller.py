@@ -2,36 +2,44 @@
 
 # Importing required libraries
 import rospy as ros
+import tf
 import sys
 import numpy as np
+import actionlib
 
 from geometry_msgs.msg import Twist
-from nav_msgs.msg import Odometry
+from nav_msgs.msg import Odometry, OccupancyGrid
 from sensor_msgs.msg import LaserScan
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+
 
 # Most generic abstract class to handle ROS publishing and subscribing
 # Add all available sensors and algorithms to this thing and make subclasses which define the move funcion and achieve greatness
-class RobotController(object):
+class RobotSlamController(object):
     """
-    Abstract class to control a trajectory on the turtlebot.
+    Abstract class to control a trajectory on the turtlebot, based on mapping data.
     Abstracts away the declaration of ros messages and subscription to ros topics for the rest of the program
     """
 
-    def __init__(self, speed=0.5, angularspeed=np.pi/4, detectionthreshold=0.5, pubrate=0.05, duration=0.1, distance=1.0, angle=np.pi/2, debug=True):
+    def __init__(self, speed=0.5, angularspeed=np.pi/4, detectionthreshold=0.6, pubrate=0.05, duration=0.1, distance=1.0, angle=np.pi/2, debug=True):
         """"
         Initialization with definition for the subscribers and publishers as well as some general parameters and variables.
         """
         # Name of our node
-        self.node_name = "robot_controller"
+        self.node_name = "robot_slam_controller"
         # ROS subscription and publication topics
         self.odom_sub_name = "/odom"
         self.lds_sub_name = "/scan"
+        self.map_sub_name = "/map"
         self.vel_pub_name = "/cmd_vel"
         # Rose subscribers and publishers
         self.odom_sub = None
         self.lds_sub = None
+        self.map_sub = None
         self.vel_pub = None
+
+        # Listener for the transformations
+        self.transformer = None
 
         # Ros parameters
         self.pub_rate = pubrate
@@ -41,6 +49,11 @@ class RobotController(object):
         self.position = None
         self.orientation = None
         self.lds_ranges = None
+        self.map = None
+        self.map_dim = None
+        self.map_res = None
+        self.map_origin = None
+        self.map_time = None
 
         # Velocity, distance and timing parameters
         self.tau = duration
@@ -77,10 +90,14 @@ class RobotController(object):
         # Subscribers and publishers
         self.odom_sub = ros.Subscriber(self.odom_sub_name, Odometry, callback=self.__odom_ros_sub, queue_size=self.queue_size)
         self.lds_sub = ros.Subscriber(self.lds_sub_name, LaserScan, callback=self.__lds_ros_sub, queue_size=self.queue_size)
+        self.map_sub = ros.Subscriber(self.map_sub_name, OccupancyGrid, callback=self.__map_ros_sub, queue_size=self.queue_size)
         self.vel_pub = ros.Publisher(self.vel_pub_name, Twist, queue_size=self.queue_size)
 
-        # Wait for the first messages to arrive
-        while any([msg is None for msg in [self.position, self.orientation, self.lds_ranges]]) and not ros.is_shutdown():
+        # Listener for the transformations
+        self.transformer = tf.TransformListener()
+
+        # Now wait until the map is made
+        while any([msg is None for msg in [self.position, self.orientation, self.lds_ranges, self.map, self.map_dim, self.map_res, self.map_origin, self.map_time]]) and not ros.is_shutdown():
             self.printd('Sleeping...')
             self.rate.sleep()
         
@@ -166,7 +183,7 @@ class RobotController(object):
         """
         Calculates the current z-angle based on     
         """
-        (_, _, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+        (_, _, yaw) = tf.transformations.euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
         return yaw
     
     def turn_for(self, tau=None, omega=None):
@@ -231,6 +248,16 @@ class RobotController(object):
         Handles subscription for the Light Distance Sensor topic.
         """
         self.lds_ranges = msg.ranges
+    
+    def __map_ros_sub(self, msg):
+        """
+        Handles subscription for the map topic.
+        """
+        self.map_dim = [msg.info.width, msg.info.height]
+        self.map_res = msg.info.resolution
+        self.map_origin = [msg.info.origin.position.x, msg.info.origin.position.y]
+        self.map_time = [msg.header.stamp.secs, msg.header.stamp.nsecs]
+        self.map = np.array(msg.data).reshape(self.map_dim)
 
     def __vel_ros_pub(self, msg):
         """
