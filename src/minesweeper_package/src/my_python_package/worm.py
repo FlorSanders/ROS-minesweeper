@@ -58,7 +58,7 @@ Class implements a trajectory in which the robot goes to the top-right corner wh
                 # We shouldn't be blocked by this point
                 (blocked, _) = self.scan_for_obstacles()
                 if not blocked:
-                    self.go_forward_by(0.5)
+                    self.go_forward_by(0.1)
                 self.turn_by(np.pi/2)
                 self.state = "WormLoopRight"
             # Just turned right
@@ -68,7 +68,7 @@ Class implements a trajectory in which the robot goes to the top-right corner wh
                 # We shouldn't be blocked by this point
                 (blocked, _) = self.scan_for_obstacles()
                 if not blocked:
-                    self.go_forward_by(0.5)
+                    self.go_forward_by(0.1)
                 self.turn_by(-np.pi/2)
                 self.state = "WormLoopLeft"
 
