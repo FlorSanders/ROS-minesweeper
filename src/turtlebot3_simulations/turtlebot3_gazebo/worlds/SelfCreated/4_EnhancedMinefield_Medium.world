@@ -16,9 +16,6 @@
   
 <!--Environment-->
 <!--***************************************************************************************-->
-    
-    
-    
     <include>
       <uri>model://sun</uri>
     </include>
@@ -266,7 +263,7 @@
       <box>
         <size>7 6 0.01</size>
       </box>
-      <model_count>40</model_count>
+      <model_count>42</model_count>
       <distribution>
         <type>random</type>
       </distribution>
