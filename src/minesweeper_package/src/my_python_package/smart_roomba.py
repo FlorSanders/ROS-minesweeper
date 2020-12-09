@@ -30,15 +30,16 @@ class SmartRoomba(RobotSlamController):
         # Coordinates we will pick our goal from
         coordinates = np.indices(self.map_dim).transpose((2,1,0))
         # Condition that we cannot set goals too close to an occupied area (threshold of occupation at 50%)
-        # boundary_coordinates = coordinates[(self.map>50)*(self.map<=100)]
-        # not_near_boundaries = np.ones(self.map_dim, dtype=bool)
-        # for point in boundary_coordinates:
-        #     not_near_boundaries[np.sum((coordinates - point)**2, -1) < (self.robot_radius/self.map_res)**2] = False
+        boundary_coordinates = coordinates[(self.map>50)*(self.map<=100)]
+        not_near_boundaries = np.ones(self.map_dim, dtype=bool)
+        for point in boundary_coordinates:
+            not_near_boundaries[np.sum((coordinates - point)**2, -1) < (self.robot_radius/self.map_res)**2] = False
         # Filter on spaces we didn't visit yet and we know are not occupied
-        options = coordinates[(self.map_visited == False)*(self.map >= 0)*(self.map <= 100)]
-        self.printd(self.map_visited)
+        options = coordinates[(self.map_visited == False)*(self.map >= 0)*(self.map <= 100)*not_near_boundaries]
+        self.printd(len(options))
         # Just pick a totally random option for now --> Create a costmap later
-        self.goal_on_map = options[np.random.choice(range(len(options)))]
+        if len(options) > 0:
+            self.goal_on_map = options[np.random.choice(range(len(options)))]
 
     def move(self):
         """
