@@ -25,6 +25,7 @@ Lauren Van De Ginste - Lauren.VanDeGinste@UGent.be
   source ~/Group-8/devel/setup.bash
   export TURTLEBOT3_MODEL=burger
   export GAZEBO_MODEL_PATH=~/Group-8/src/minesweeper_package/gazebo_models:${GAZEBO_MODEL_PATH}
+  export ROBOTICS_PROJECT_DIR="<path to project directory>"
   ```
   Note: the `export GAZEBO_MODEL_PATH=~$(ROBOTICS_PATH)/src/minesweeper_package/gazebo_models:${GAZEBO_MODEL_PATH}` command points towards the newly created Gazebo models and links them.
 
