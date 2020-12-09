@@ -10,7 +10,7 @@ from my_python_package.robot_controller import RobotController
 # Second "minesweeper strategy": Goes to the top corner and and goes down covering each line
 class Worm(RobotController):
     """
-    Class implements a trajectory in which the robot goes to the top-right corner which then goes left, then goes to the next line.
+Class implements a trajectory in which the robot goes to the top-right corner which then goes left, then goes to the next line.
     """
 
     def __init__(self, **params):
@@ -19,7 +19,7 @@ class Worm(RobotController):
         """
         # Use the superclass initialization function
         self.state = "Begin"
-        super(Worm, self).__init__(**params)    
+        super(Worm, self).__init__(**params)  
     
     def goForwardUntilBlocked(self):
         """
@@ -36,7 +36,7 @@ class Worm(RobotController):
             else:
                 # As long as we're not blocked, move forward
                 self.go_forward_by(0.1)
-    
+
     def move(self):
         """
         1. Drives to the right-top corner.  
@@ -56,23 +56,21 @@ class Worm(RobotController):
                 self.goForwardUntilBlocked()
                 self.turn_by(np.pi/2)
                 # We shouldn't be blocked by this point
-                if blocked:
-                    self.turn_by(np.pi/4)
-                else:
+                (blocked, _) = self.scan_for_obstacles()
+                if not blocked:
                     self.go_forward_by(0.1)
-                    self.turn_by(np.pi/2)
-                    self.state = "WormLoopRight"
+                self.turn_by(np.pi/2)
+                self.state = "WormLoopRight"
             # Just turned right
             elif self.state == "WormLoopRight":
                 self.goForwardUntilBlocked()
                 self.turn_by(-np.pi/2)
                 # We shouldn't be blocked by this point
-                if blocked:
-                    self.turn_by(np.pi/4)
-                else:
+                (blocked, _) = self.scan_for_obstacles()
+                if not blocked:
                     self.go_forward_by(0.1)
-                    self.turn_by(-np.pi/2)
-                    self.state = "WormLoopLeft"
+                self.turn_by(-np.pi/2)
+                self.state = "WormLoopLeft"
 
 # Starting the robot
 def main():
