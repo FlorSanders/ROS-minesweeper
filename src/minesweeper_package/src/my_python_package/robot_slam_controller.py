@@ -21,7 +21,7 @@ class RobotSlamController(object):
     Abstracts away the declaration of ros messages and subscription to ros topics for the rest of the program
     """
 
-    def __init__(self, speed=0.5, angularspeed=np.pi/4, detectionthreshold=0.6, pubrate=0.05, duration=0.1, distance=1.0, angle=np.pi/2, debug=True):
+    def __init__(self, speed=0.5, angularspeed=np.pi/4, detectionthreshold=0.5, pubrate=0.05, duration=0.1, distance=1.0, angle=np.pi/2, debug=True):
         """"
         Initialization with definition for the subscribers and publishers as well as some general parameters and variables.
         """
@@ -72,7 +72,6 @@ class RobotSlamController(object):
         """
         if self.debug:
             ros.loginfo(str(msg))
-            print(str(msg))
 
     def start_ros(self):
         """
@@ -255,8 +254,8 @@ class RobotSlamController(object):
         """
         self.map_dim = [msg.info.width, msg.info.height]
         self.map_res = msg.info.resolution
-        self.map_origin = [msg.info.origin.position.x, msg.info.origin.position.y]
-        self.map_time = [msg.header.stamp.secs, msg.header.stamp.nsecs]
+        self.map_origin = np.array([msg.info.origin.position.x, msg.info.origin.position.y])
+        self.map_time = np.array([msg.header.stamp.secs, msg.header.stamp.nsecs])
         self.map = np.array(msg.data).reshape(self.map_dim)
 
     def __vel_ros_pub(self, msg):
