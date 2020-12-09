@@ -90,7 +90,7 @@ optional arguments:
 
 ```
 
-##Visualization of the statistics
+## Visualization of the statistics
 The script robot_path can be used to visualize the trajectory of the robot and the distribution of the mines.
 ```usage: robot_path.py [-h] [--duration DURATION] [--mines MINES]
                      world file_name
