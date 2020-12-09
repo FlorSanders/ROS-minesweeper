@@ -38,6 +38,8 @@ class RobotSlamController(object):
         self.lds_sub = None
         self.map_sub = None
         self.vel_pub = None
+        # Move base action client
+        self.action_client = None
 
         # Listener for the transformations
         self.transformer = None
@@ -45,6 +47,7 @@ class RobotSlamController(object):
         # Ros parameters
         self.pub_rate = 0.05
         self.queue_size = 2
+        self.robot_radius = 0.18
 
         # Variables to store sensor information in
         self.position = None
@@ -100,7 +103,11 @@ class RobotSlamController(object):
         # Listener for the transformations
         self.transformer = tf.TransformListener()
 
-        # Now wait until the map is made
+        # Initialize the action client for move_base goals and wait for server startup
+        self.action_client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+        self.action_client.wait_for_server()
+
+        # Now wait until all topics have received at least one message
         while any([msg is None for msg in [self.position, self.orientation, self.lds_ranges, self.map, self.map_dim, self.map_res, self.map_origin, self.map_time]]) and not ros.is_shutdown():
             self.printd('Sleeping...')
             self.rate.sleep()
@@ -118,6 +125,30 @@ class RobotSlamController(object):
             self.rate.sleep()
         
         sys.exit('The robot has been stopped.')
+
+    def send_goal(self):
+        """
+        Send the goal saved in goal_on_map as a goal to the move_base client.
+        As the orientation is not all that important to us, we'll use the current orientation of the robot (which hopefully requires little turning)
+        """
+        # Creating new map
+        goal = MoveBaseGoal()
+        # Picking reference frame
+        goal.target_pose.header.frame_id = 'map'
+        goal.target_pose.header.stamp = ros.Time.now()
+        # Defining how many meters we want to move in which direction with respect to the map reference frame (just move 0.5m along x direction for now)
+        goal.target_pose.pose.position.x = self.goal_on_map[0]*self.map_res + self.map_origin[0]
+        goal.target_pose.pose.position.y = self.goal_on_map[1]*self.map_res + self.map_origin[1]
+        # The new orientation can be the same as our current orientation --> probably smarter options available though
+        goal.target_pose.pose.orientation = self.orientation
+        # Sending the goal using our client
+        self.action_client.send_goal(goal)
+        wait = self.action_client.wait_for_result()
+        if not wait:
+            self.printd('Action server not available')
+            self.stop_robot()
+        else:
+            return self.action_client.get_result()
         
     def move(self):
         """
@@ -150,16 +181,15 @@ class RobotSlamController(object):
             self.map_visited = np.zeros(self.map_dim, dtype=bool)
         
         # Updating the visited points on the map
-        robot_radius=0.18
         coordinates = np.indices(self.map_dim).transpose((2,1,0))
         if np.any(self.previous_on_map == None):
-            self.map_visited[np.sum((coordinates - self.position_on_map)**2, -1) < (robot_radius/self.map_res)**2] = True
+            self.map_visited[np.sum((coordinates - self.position_on_map)**2, -1) < (self.robot_radius/self.map_res)**2] = True
         else:
             n_points = 10
             direction = (self.position_on_map - self.previous_on_map)/(n_points-1)
             for i in range(n_points):
                 point = self.previous_on_map + i*direction
-                self.map_visited[np.sum((coordinates - point)**2, -1) < (robot_radius/self.map_res)**2] = True
+                self.map_visited[np.sum((coordinates - point)**2, -1) < (self.robot_radius/self.map_res)**2] = True
         
         # If the map itself has changed --> Apply corrections as well
         if self.map_visited.shape != self.map.shape or np.any(self.map_visited_origin != self.map_origin):
