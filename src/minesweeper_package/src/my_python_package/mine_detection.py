@@ -2,7 +2,8 @@
 import rospy
 import numpy as np
 import os
-from time import sleep
+import time
+import threading
 from gazebo_msgs.srv import GetModelState, DeleteModel, SpawnModel, GetWorldProperties
 from geometry_msgs.msg import Pose
 from std_msgs.msg import Int16
@@ -29,9 +30,18 @@ class mine_detection(AbstractTurtle):
         root = os.environ.get("ROBOTICS_PROJECT_DIR")
         root = os.path.expanduser(root)
 
-        #log the number of cleared mines
-        self.log = open(os.path.join(root, "src/minesweeper_package/log/stats.txt"), "w")
+        #retrieve local time 
+        year, month, day, hour, minute, second = time.strftime("%Y,%m,%d,%H,%M,%S").split(',')
+
+        #log for the number of cleared mines
+        file_name = str(day) + "-" + str(month) + "-" + str(year) + "_" +str(hour) + ":" + str(minute) + ":" + str(second)  + "_mines"+ ".txt"
+        self.log = open(os.path.join(root, "src/minesweeper_package/log/", file_name), "w")
         self.log.write("time;count;mine_x;mine_y;mine_z;robot_x;robot_y;robot_z\n")
+
+        #log for the robot position
+        file_name = str(day) + "-" + str(month) + "-" + str(year) + "_" +str(hour) + ":" + str(minute) + ":" + str(second)  + "_robot_pos"+ ".txt"
+        self.log_pos = open(os.path.join(root, "src/minesweeper_package/log/", file_name), "w")
+        self.log_pos.write("time;robot_x;robot_y\n")
 
         #open the model of the green green mines
         model = open(os.path.join(root + "src/minesweeper_package/gazebo_models/Landmine_0-018x0-005_Green/model.sdf"), "r")
@@ -43,15 +53,20 @@ class mine_detection(AbstractTurtle):
         
         """ main loop of the program """
         self.count_mines()
+        self.initial_time = rospy.get_time()
         while not rospy.is_shutdown():
-                self.scan_mines()
+            self.scan_mines()
         self.log.close()
+        self.log_pos.close()
+
+
 
     def scan_mines(self):
         get_coordinates = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
         remove_model = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
         robot_coords = get_coordinates("turtlebot3_burger", "").pose.position
         robot_pos = np.array([robot_coords.x, robot_coords.y, robot_coords.z])
+        simulation_time=rospy.get_time()-self.initial_time
         for mine in self.mines:
             mine_pose = get_coordinates(mine, "" ).pose
             mine_coords = mine_pose.position
@@ -62,9 +77,10 @@ class mine_detection(AbstractTurtle):
                 self.spwan_green_mine(mine_pose)
                 self.cleared_mines += 1
                 self.hit_publisher.publish(self.cleared_mines)
-                self.log.write(str(rospy.get_time()) + ";" + str(self.cleared_mines) + ";" + str(mine_coords.x) + ";" + str(mine_coords.y)  + ";" + str(mine_coords.z) + ";"
-                    + str(robot_coords.x) + ";" + str(robot_coords.y) + ";" + str(robot_coords.z) + "\n")
-        sleep(0.1)
+                self.log.write(str(simulation_time) + ";" + str(self.cleared_mines) + ";" + str(mine_coords.x) + ";" + str(mine_coords.y) 
+                     + ";" + str(mine_coords.z) + ";" + str(robot_coords.x) + ";" + str(robot_coords.y) + ";" + str(robot_coords.z) + "\n")
+        self.log_pos.write(str(simulation_time) + ";" + str(robot_coords.x) + ";" + str(robot_coords.y) + "\n")
+        time.sleep(0.1)
     
     def spwan_green_mine(self, pose):
         rospy.wait_for_service('/gazebo/spawn_sdf_model')
@@ -94,6 +110,8 @@ class mine_detection(AbstractTurtle):
                 mines.append(model_name)
         self.mines=mines
         print("simulation started with: {} mines".format(len(mines)))
+    
+
     
     def get_n_remaining_mines(self):
         return len(self.mines)
