@@ -2,6 +2,18 @@
 <sdf version='1.7'>
   <world name='Minesweeping'>
   
+<!--Settings-->
+<!--***************************************************************************************--> 
+  
+    <physics type="ode">
+      <real_time_update_rate>0</real_time_update_rate>   <!-- Running at max speed! -->
+      <ode>
+        <solver>
+          <iters>30</iters> <!-- Decreasing accuracy for hardware reasons -->
+        </solver>
+      </ode>
+    </physics>
+    
 <!--Environment-->
 <!--***************************************************************************************-->
     <include>
@@ -313,7 +325,7 @@
       <box>
         <size>7 6 0.01</size>
       </box>
-      <model_count>35</model_count>
+      <model_count>42</model_count>
       <distribution>
         <type>random</type>
       </distribution>

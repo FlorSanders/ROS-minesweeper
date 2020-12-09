@@ -9,7 +9,7 @@ import os
 import argparse
 import sys
 
-def launch_simulation(strategy, environment, duration=30, repetitions=10):
+def launch_simulation(strategy, environment, duration=1800, repetitions=10):
     """
     Launches {repetitions} simulations for a given {strategy}, taking {duration} minutes per simulation.
     """
@@ -41,7 +41,7 @@ def launch_simulation(strategy, environment, duration=30, repetitions=10):
 
         # Launch the robot and sleep until it's shutdown time
         driver_launcher.start()
-        ros.sleep(60*duration)
+        ros.sleep(duration)
 
         # Shutdown both launchers and wait a couple of seconds
         driver_launcher.shutdown()
@@ -75,9 +75,9 @@ if __name__ == "__main__":
         type=str
     )
     parser.add_argument('--duration',
-        help="How long (in minutes) each simulation will run for (in simulated time).",
+        help="How long (in seconds) each simulation will run for (in simulated time).",
         nargs='?',
-        default=30,
+        default=1800,
         type=float
     )
     parser.add_argument('--repetitions',
