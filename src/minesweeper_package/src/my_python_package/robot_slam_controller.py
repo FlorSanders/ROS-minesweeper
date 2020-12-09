@@ -45,14 +45,25 @@ class RobotSlamController(object):
         # Variables to store sensor information in
         self.position = None
         self.orientation = None
+        # Variables to do with the mapping process
         self.map = None
         self.map_dim = None
         self.map_res = None
         self.map_origin = None
         self.map_time = None
+        self.map_visited = None
+        self.map_visited_origin = None
+        self.position_on_map = None
+        self.previous_on_map = None
+        self.orientation_on_map = None
+        self.goal_on_map = None
 
         # Debugging option
         self.debug = debug
+
+        if self.debug:
+            # Start a new figure to visualize our data
+            plt.figure(figsize = (30,30))
 
     def printd(self, msg):
         """
@@ -83,7 +94,7 @@ class RobotSlamController(object):
         self.transformer = tf.TransformListener()
 
         # Now wait until the map is made
-        while any([msg is None for msg in [self.position, self.orientation, self.lds_ranges, self.map, self.map_dim, self.map_res, self.map_origin, self.map_time]]) and not ros.is_shutdown():
+        while any([msg is None for msg in [self.position, self.orientation, self.map, self.map_dim, self.map_res, self.map_origin, self.map_time]]) and not ros.is_shutdown():
             self.printd('Sleeping...')
             self.rate.sleep()
         
@@ -116,15 +127,95 @@ class RobotSlamController(object):
         self.position = msg.pose.pose.position
         self.orientation = msg.pose.pose.orientation
     
+    def __update_map_visited(self):
+        """
+        Builds or updates the visited map based on the map data we just obtained
+        """
+        # Checking if we already have a map
+        if np.any(self.map_visited == None):
+            # Uninitialised map ==> fresh start
+            self.map_visited = np.zeros(self.map_dim, dtype=bool)
+        
+        # Updating the visited points on the map
+        robot_radius=0.18
+        coordinates = np.indices(self.map_dim).transpose((2,1,0))
+        if np.any(self.previous_on_map == None):
+            self.map_visited[np.sum((coordinates - self.position_on_map)**2, -1) < (robot_radius/self.map_res)**2] = True
+        else:
+            n_points = 10
+            direction = (self.position_on_map - self.previous_on_map)/(n_points-1)
+            for i in range(n_points):
+                point = self.previous_on_map + i*direction
+                self.map_visited[np.sum((coordinates - point)**2, -1) < (robot_radius/self.map_res)**2] = True
+        
+        # If the map itself has changed --> Apply corrections as well
+        if self.map_visited.shape != self.map.shape or np.any(self.map_visited_origin != self.map_origin):
+            self.printd("Map has changed!!")
+            # Correct the size of the map
+            ## TODO --> Necessary?
+            # Corrected the origin of the map
+            self.map_visited_origin = self.map_origin
+    
+    def __get_pose_on_map(self):
+        """
+        Performs all the required transformations from the mapping data to derive our pose on the map
+        """
+        # Obtain the (transformed) position and rotation from the topics
+        try:
+            translation, rotation = self.transformer.lookupTransform('/map', '/base_link', ros.Time(self.map_time[0], self.map_time[1]))
+            self.previous_on_map = self.position_on_map
+            self.position_on_map = (np.array(translation[0:2]) - self.map_origin) / self.map_res
+            _,_,self.orientation_on_map = tf.transformations.euler_from_quaternion(rotation)
+            return True
+        except(tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            # Something could go wrong in transformation
+            return False
+
+
+    def __plot_map(self):
+        """
+        Update the visualization of the map
+        """
+        # Configure matplotlib
+        plt.clf()
+        ax = plt.gca()
+
+        # Convert the map values to something more usable
+        map_visualize = self.map.copy()
+        map_visualize[map_visualize == -1] = 250
+        map_visualize[self.map_visited] = 150
+
+        # Show our current position and orientation
+        ax.scatter(self.position_on_map[1], self.position_on_map[0], color='black', s=25)
+        ax.arrow(self.position_on_map[1], self.position_on_map[0], np.sin(self.orientation_on_map)*10, np.cos(self.orientation_on_map)*10, color='grey')
+
+        # Plot the map
+        ax.matshow(map_visualize.T)
+        ax.invert_yaxis()
+        ax.invert_xaxis()
+
+        # Actually show the map
+        plt.pause(1e-3)
+
     def __map_ros_sub(self, msg):
         """
         Handles subscription for the map topic.
         """
+        # Getting the information that's immediately available in the message
         self.map_dim = [msg.info.width, msg.info.height]
         self.map_res = msg.info.resolution
         self.map_origin = np.array([msg.info.origin.position.x, msg.info.origin.position.y])
         self.map_time = np.array([msg.header.stamp.secs, msg.header.stamp.nsecs])
         self.map = np.array(msg.data).reshape(self.map_dim)
+        # Get the pose on the new map we reveived
+        success = self.__get_pose_on_map()
+        # Update the places we visited based on all information we have, if previous operation was succeful
+        if success:
+            self.__update_map_visited()
+            # Plot the map, if debugging is enabled
+            if self.debug:
+                self.__plot_map()
+
 
     def __vel_ros_pub(self, msg):
         """
