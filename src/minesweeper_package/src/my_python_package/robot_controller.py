@@ -18,7 +18,7 @@ class RobotController(object):
     Abstracts away the declaration of ros messages and subscription to ros topics for the rest of the program
     """
 
-    def __init__(self, speed=0.5, angularspeed=np.pi/4, detectionthreshold=0.6, pubrate=0.05, duration=0.1, distance=1.0, angle=np.pi/2, debug=True):
+    def __init__(self, speed=0.5, angularspeed=np.pi/4, detectionthreshold=0.5, pubrate=0.05, duration=0.1, distance=1.0, angle=np.pi/2, debug=True):
         """"
         Initialization with definition for the subscribers and publishers as well as some general parameters and variables.
         """
