@@ -4,8 +4,8 @@ import rospy as ros
 import tf
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
 import time
+import matplotlib.pyplot as plt
 
 from my_python_package.robot_slam_controller import RobotSlamController
 
@@ -39,9 +39,43 @@ class SmartRoomba(RobotSlamController):
         Moving strategy for our smart roomba
         """
         # Run as long as we're not shut down
-        while not ros.is_shutdown():       
-            # Simply sleep the time away for now
+        while not ros.is_shutdown():
+            
+            # Plot the map
+            self.__plot_map()
+
+            # Go to sleep again
+            self.printd('Sleeping again...')
             self.rate.sleep()
+
+    def __plot_map(self):
+        """
+        Updates the visualization on the map if the controller signals there's something new to be visualized
+        This plotting function can only be run in the main loop
+        """
+        if self.map_update:
+            self.map_update = False
+            self.printd('Plotting map...')
+            # Configure matplotlib
+            plt.clf()
+            ax = plt.gca()
+
+            # Convert the map values to something more usable
+            map_visualize = self.map.copy()
+            map_visualize[map_visualize == -1] = 250
+            map_visualize[self.map_visited] = 150
+
+            # Show our current position and orientation
+            ax.scatter(self.position_on_map[1], self.position_on_map[0], color='black', s=25)
+            ax.arrow(self.position_on_map[1], self.position_on_map[0], np.sin(self.orientation_on_map)*10, np.cos(self.orientation_on_map)*10, color='grey')
+
+            # Plot the map
+            ax.matshow(map_visualize.T)
+            ax.invert_yaxis()
+            ax.invert_xaxis()
+
+            # Actually show the map
+            plt.pause(1e-3)
 
 # Starting the robot
 def main():

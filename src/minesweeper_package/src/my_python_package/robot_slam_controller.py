@@ -6,6 +6,7 @@ import tf
 import sys
 import numpy as np
 import actionlib
+import matplotlib.pyplot as plt
 
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry, OccupancyGrid
@@ -29,9 +30,12 @@ class RobotSlamController(object):
         self.node_name = "robot_slam_controller"
         # ROS subscription and publication topics
         self.odom_sub_name = "/odom"
+        self.lds_sub_name = "/scan"
         self.map_sub_name = "/map"
+        self.vel_pub_name = "/cmd_vel"
         # Rose subscribers and publishers
         self.odom_sub = None
+        self.lds_sub = None
         self.map_sub = None
         self.vel_pub = None
 
@@ -45,8 +49,10 @@ class RobotSlamController(object):
         # Variables to store sensor information in
         self.position = None
         self.orientation = None
+        self.lds_ranges = None
         # Variables to do with the mapping process
         self.map = None
+        self.map_update = False
         self.map_dim = None
         self.map_res = None
         self.map_origin = None
@@ -87,6 +93,7 @@ class RobotSlamController(object):
 
         # Subscribers and publishers
         self.odom_sub = ros.Subscriber(self.odom_sub_name, Odometry, callback=self.__odom_ros_sub, queue_size=self.queue_size)
+        self.lds_sub = ros.Subscriber(self.lds_sub_name, LaserScan, callback=self.__lds_ros_sub, queue_size=self.queue_size)
         self.map_sub = ros.Subscriber(self.map_sub_name, OccupancyGrid, callback=self.__map_ros_sub, queue_size=self.queue_size)
         self.vel_pub = ros.Publisher(self.vel_pub_name, Twist, queue_size=self.queue_size)
 
@@ -94,7 +101,7 @@ class RobotSlamController(object):
         self.transformer = tf.TransformListener()
 
         # Now wait until the map is made
-        while any([msg is None for msg in [self.position, self.orientation, self.map, self.map_dim, self.map_res, self.map_origin, self.map_time]]) and not ros.is_shutdown():
+        while any([msg is None for msg in [self.position, self.orientation, self.lds_ranges, self.map, self.map_dim, self.map_res, self.map_origin, self.map_time]]) and not ros.is_shutdown():
             self.printd('Sleeping...')
             self.rate.sleep()
         
@@ -126,6 +133,12 @@ class RobotSlamController(object):
         """
         self.position = msg.pose.pose.position
         self.orientation = msg.pose.pose.orientation
+    
+    def __lds_ros_sub(self, msg):
+        """
+        Handles subscription for the Light Distance Sensor topic.
+        """
+        self.lds_ranges = msg.ranges
     
     def __update_map_visited(self):
         """
@@ -162,45 +175,21 @@ class RobotSlamController(object):
         """
         # Obtain the (transformed) position and rotation from the topics
         try:
-            translation, rotation = self.transformer.lookupTransform('/map', '/base_link', ros.Time(self.map_time[0], self.map_time[1]))
+            translation, rotation = self.transformer.lookupTransform('/map', 'base_footprint', ros.Time(self.map_time[0], self.map_time[1]))
             self.previous_on_map = self.position_on_map
             self.position_on_map = (np.array(translation[0:2]) - self.map_origin) / self.map_res
             _,_,self.orientation_on_map = tf.transformations.euler_from_quaternion(rotation)
             return True
-        except(tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+        except(tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as err:
             # Something could go wrong in transformation
+            self.printd(err)
             return False
-
-
-    def __plot_map(self):
-        """
-        Update the visualization of the map
-        """
-        # Configure matplotlib
-        plt.clf()
-        ax = plt.gca()
-
-        # Convert the map values to something more usable
-        map_visualize = self.map.copy()
-        map_visualize[map_visualize == -1] = 250
-        map_visualize[self.map_visited] = 150
-
-        # Show our current position and orientation
-        ax.scatter(self.position_on_map[1], self.position_on_map[0], color='black', s=25)
-        ax.arrow(self.position_on_map[1], self.position_on_map[0], np.sin(self.orientation_on_map)*10, np.cos(self.orientation_on_map)*10, color='grey')
-
-        # Plot the map
-        ax.matshow(map_visualize.T)
-        ax.invert_yaxis()
-        ax.invert_xaxis()
-
-        # Actually show the map
-        plt.pause(1e-3)
 
     def __map_ros_sub(self, msg):
         """
         Handles subscription for the map topic.
         """
+        self.printd('Received map')
         # Getting the information that's immediately available in the message
         self.map_dim = [msg.info.width, msg.info.height]
         self.map_res = msg.info.resolution
@@ -211,11 +200,12 @@ class RobotSlamController(object):
         success = self.__get_pose_on_map()
         # Update the places we visited based on all information we have, if previous operation was succeful
         if success:
+            self.printd('Success')
             self.__update_map_visited()
             # Plot the map, if debugging is enabled
             if self.debug:
-                self.__plot_map()
-
+                self.printd('Map can be plotted now')
+                self.map_update = True
 
     def __vel_ros_pub(self, msg):
         """
