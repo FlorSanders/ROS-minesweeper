@@ -91,7 +91,7 @@ optional arguments:
 ```
 
 ## Visualization of the statistics
-The script robot_path can be used to visualize the trajectory of the robot and the distribution of the mines.
+The script robot_path can be used to visualize the trajectory of the robot and the distribution of the mines. Always pass the log file ending with 'robot_pos.txt'.
 ```
 usage: robot_path.py [-h] [--duration DURATION] [--mines MINES]
                      world file_name
@@ -107,7 +107,7 @@ positional arguments:
 optional arguments:
   -h, --help           show this help message and exit
   --duration DURATION  time in seconds of the simulation
-  --mines MINES        Indicate the positions of the mines [True/False]
+  --mines MINES        Indicate the positions of the mines
 ```
 
 ## Report
