@@ -27,24 +27,28 @@ class mine_detection(AbstractTurtle):
         self.hit_publisher = rospy.Publisher('cleared_mines', Int16, queue_size=2)
 
         #retrieve the path to the working directory of the project
-        root = os.environ.get("ROBOTICS_PROJECT_DIR")
-        root = os.path.expanduser(root)
+        self.root = os.environ.get("ROBOTICS_PROJECT_DIR")
+        self.root = os.path.expanduser(self.root)
 
         #retrieve local time 
         year, month, day, hour, minute, second = time.strftime("%Y,%m,%d,%H,%M,%S").split(',')
+        self.time_prefix = str(day) + "-" + str(month) + "-" + str(year) + "_" +str(hour) + ":" + str(minute) + ":" + str(second)
 
         #log for the number of cleared mines
-        file_name = str(day) + "-" + str(month) + "-" + str(year) + "_" +str(hour) + ":" + str(minute) + ":" + str(second)  + "_mines"+ ".txt"
-        self.log = open(os.path.join(root, "src/minesweeper_package/log/", file_name), "w")
+        file_name = self.time_prefix + "_mines"+ ".txt"
+        self.log = open(os.path.join(self.root, "src/minesweeper_package/log/", file_name), "w")
         self.log.write("time;count;mine_x;mine_y;mine_z;robot_x;robot_y;robot_z\n")
 
         #log for the robot position
-        file_name = str(day) + "-" + str(month) + "-" + str(year) + "_" +str(hour) + ":" + str(minute) + ":" + str(second)  + "_robot_pos"+ ".txt"
-        self.log_pos = open(os.path.join(root, "src/minesweeper_package/log/", file_name), "w")
+        file_name = self.time_prefix  + "_robot_pos"+ ".txt"
+        self.log_pos = open(os.path.join(self.root, "src/minesweeper_package/log/", file_name), "w")
         self.log_pos.write("time;robot_x;robot_y\n")
+        
+        #retrieve the distribution of the mines in the simulation world
+        self.count_mines()
 
         #open the model of the green green mines
-        model = open(os.path.join(root + "src/minesweeper_package/gazebo_models/Landmine_0-018x0-005_Green/model.sdf"), "r")
+        model = open(os.path.join(self.root + "src/minesweeper_package/gazebo_models/Landmine_0-018x0-005_Green/model.sdf"), "r")
         self.green_mine_model = model.read()
         model.close()
 
@@ -52,7 +56,6 @@ class mine_detection(AbstractTurtle):
     def run(self):
         
         """ main loop of the program """
-        self.count_mines()
         self.initial_time = rospy.get_time()
         while not rospy.is_shutdown():
             self.scan_mines()
@@ -103,13 +106,20 @@ class mine_detection(AbstractTurtle):
     def count_mines(self):
         rospy.wait_for_service('/gazebo/get_world_properties')
         get_world_properties = rospy.ServiceProxy('/gazebo/get_world_properties', GetWorldProperties)
+        rospy.wait_for_service('/gazebo/get_model_state')
+        get_coordinates = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
         world = get_world_properties().model_names
-        mines = []
+        self.mines = []
+        file_name = self.time_prefix + "_distribution.txt"
+        self.log_distr = open(os.path.join(self.root, "src/minesweeper_package/log/", file_name), "w")
+        self.log_distr.write("mine_x;mine_y\n")
         for model_name in world:
             if model_name[:8] == "Landmine":
-                mines.append(model_name)
-        self.mines=mines
-        print("simulation started with: {} mines".format(len(mines)))
+                self.mines.append(model_name)
+                mine_pos = get_coordinates(model_name, "" ).pose.position
+                self.log_distr.write(str(mine_pos.x) + ";" + str(mine_pos.y) + "\n")
+        self.log_distr.close()
+        print("simulation started with: {} mines".format(len(self.mines)))
     
 
     
