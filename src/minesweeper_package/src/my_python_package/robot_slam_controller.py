@@ -80,7 +80,7 @@ class RobotSlamController(object):
         Function that prints only if debug is active
         """
         if self.debug:
-            ros.logerr(str(msg))
+            ros.loginfo(str(msg))
 
     def start_ros(self):
         """
@@ -221,7 +221,7 @@ class RobotSlamController(object):
         """
         # Obtain the (transformed) position and rotation from the topics
         try:
-            translation, rotation = self.transformer.lookupTransform('/map', 'base_footprint', ros.Time(self.map_time[0], self.map_time[1]))
+            translation, rotation = self.transformer.lookupTransform('/map', 'base_footprint', ros.Time.now())
             self.previous_on_map = self.position_on_map
             self.position_on_map = (np.array(translation[0:2]) - self.map_origin) / self.map_res
             _,_,self.orientation_on_map = tf.transformations.euler_from_quaternion(rotation)
