@@ -47,7 +47,7 @@ class RobotSlamController(object):
         # Ros parameters
         self.pub_rate = 0.05
         self.queue_size = 2
-        self.robot_radius = 0.18
+        self.robot_radius = 0.1
 
         # Variables to store sensor information in
         self.position = None
@@ -66,6 +66,7 @@ class RobotSlamController(object):
         self.previous_on_map = None
         self.orientation_on_map = None
         self.goal_on_map = None
+        self.goal_orientation_on_map = None
 
         # Debugging option
         self.debug = debug
@@ -126,6 +127,16 @@ class RobotSlamController(object):
         
         sys.exit('The robot has been stopped.')
 
+    def set_goal_angle(self):
+        """
+        Returns the orientation the robot should have to be turned towards the goal
+        """
+        vector = self.goal_on_map - self.position_on_map
+        alpha = np.arctan(vector[1]/vector[0])
+        if vector[0] < 0:
+            alpha = np.pi+alpha
+        self.goal_orientation_on_map = alpha
+
     def send_goal(self):
         """
         Send the goal saved in goal_on_map as a goal to the move_base client.
@@ -139,8 +150,12 @@ class RobotSlamController(object):
         # Defining how many meters we want to move in which direction with respect to the map reference frame (just move 0.5m along x direction for now)
         goal.target_pose.pose.position.x = self.goal_on_map[0]*self.map_res + self.map_origin[0]
         goal.target_pose.pose.position.y = self.goal_on_map[1]*self.map_res + self.map_origin[1]
-        # The new orientation can be the same as our current orientation --> probably smarter options available though
-        goal.target_pose.pose.orientation = self.orientation
+        # Using the ideal "straight line" orientation computed earlier as the goal orientation
+        goal_orientation = tf.transformations.quaternion_about_axis(self.goal_orientation_on_map, (0,0,1))
+        goal.target_pose.pose.orientation.x = goal_orientation[0]
+        goal.target_pose.pose.orientation.y = goal_orientation[1]
+        goal.target_pose.pose.orientation.z = goal_orientation[2]
+        goal.target_pose.pose.orientation.w = goal_orientation[3]
         # Sending the goal using our client
         self.action_client.send_goal(goal)
         wait = self.action_client.wait_for_result()
