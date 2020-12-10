@@ -23,6 +23,7 @@ class SmartRoomba(RobotSlamController):
         # Set the strategy
         if strategy in ['random', 'near', 'far']:
             self.strategy = strategy
+            self.node_name = f'smart_{strategy}'
         else:
             sys.exit('The requested strategy is not available')
         # Use the superclass initialization function
@@ -130,7 +131,7 @@ class SmartRoomba(RobotSlamController):
             plt.pause(1e-3)
 
 # Starting the robot
-def main(strategy = 'far'):
+def main(strategy):
     r = SmartRoomba(strategy)
     r.start_ros()
     r.move()

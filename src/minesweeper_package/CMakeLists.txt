@@ -164,7 +164,9 @@ catkin_install_python(PROGRAMS
   nodes/motion_detection
   nodes/mine_detection
   nodes/random_roomba
-  nodes/smart_roomba
+  nodes/smart_random
+  nodes/smart_near
+  nodes/smart_far
   nodes/open_loop_driver
   nodes/worm
   nodes/square_spiral

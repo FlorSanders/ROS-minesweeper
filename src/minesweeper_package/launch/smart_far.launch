@@ -1,6 +1,7 @@
 <launch>
+  <!-- MUST BE RUN ALONE, OTHERWISE THE NAME IS NOT RECOGNISED -->
+  <node pkg="minesweeper_package" type="smart_far" name="smart_far"></node>
   <group ns="myturtlebot">
-    <node pkg="minesweeper_package" type="smart_roomba" name="smart_roomba"></node>
     <node pkg="minesweeper_package" type="mine_detection" name="mine_detection"></node>
     <!-- Additional nodes go above this line -->
   </group>
