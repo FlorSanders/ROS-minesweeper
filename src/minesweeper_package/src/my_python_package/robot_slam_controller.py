@@ -106,11 +106,12 @@ class RobotSlamController(object):
 
         # Initialize the action client for move_base goals and wait for server startup
         self.action_client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+        self.printd('Waiting for action server to become available...')
         self.action_client.wait_for_server()
 
         # Now wait until all topics have received at least one message
         while any([msg is None for msg in [self.position, self.orientation, self.lds_ranges, self.map, self.map_dim, self.map_res, self.map_origin, self.map_time]]) and not ros.is_shutdown():
-            self.printd('Sleeping...')
+            self.printd('Waiting for messages to arrive...')
             self.rate.sleep()
         
     def stop_robot(self):
