@@ -72,6 +72,11 @@ class SmartRoomba(RobotSlamController):
             self.goal_on_map = options[choice]
             # Compute the best orientation at the goal position considering our current position
             self.set_goal_angle()
+        else:
+            # If all legal points have been visited (unprobable but okay) -- clear the map to start over
+            self.map_visited = np.zeros(self.map_dim, dtype=bool)
+            # Try again in goal setting
+            self.set_goal()
 
     def move(self):
         """
