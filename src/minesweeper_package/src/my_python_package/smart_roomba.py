@@ -130,7 +130,7 @@ class SmartRoomba(RobotSlamController):
             plt.pause(1e-3)
 
 # Starting the robot
-def main(strategy = 'near'):
+def main(strategy = 'far'):
     r = SmartRoomba(strategy)
     r.start_ros()
     r.move()
