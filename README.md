@@ -122,4 +122,5 @@ Overleaf report-link: https://www.overleaf.com/8928521917hdmphszkkkrj
 - Gazebo colors and textures tutorial: http://gazebosim.org/tutorials?tut=color_model
 - Gazebo populations tutorial: http://gazebosim.org/tutorials?tut=model_population&cat=build_world
 - Launch turtlebot3 simulations with ros: https://automaticaddison.com/how-to-launch-the-turtlebot3-simulation-with-ros/
+- ROS action client tutrial: https://hotblackrobotics.github.io/en/blog/2018/01/29/action-client-py/
 - ROS navigation stack tutorials: https://www.youtube.com/watch?v=5nZc5iSr5is
