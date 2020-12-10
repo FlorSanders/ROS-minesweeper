@@ -22,7 +22,7 @@ class RobotSlamController(object):
     Abstracts away the declaration of ros messages and subscription to ros topics for the rest of the program
     """
 
-    def __init__(self, debug=True):
+    def __init__(self, debug=False):
         """"
         Initialization with definition for the subscribers and publishers as well as some general parameters and variables.
         """
@@ -80,7 +80,7 @@ class RobotSlamController(object):
         Function that prints only if debug is active
         """
         if self.debug:
-            ros.loginfo(str(msg))
+            ros.logerr(str(msg))
 
     def start_ros(self):
         """
