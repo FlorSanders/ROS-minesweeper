@@ -51,6 +51,7 @@ def launch_simulation(strategy, environment, duration=1800, repetitions=10, dela
             # Launch both the navigation and slam parts
             slam_launcher = roslaunch.parent.ROSLaunchParent(uuid, [slam_path])
             slam_launcher.start()
+            time.sleep(delay)
             navigation_launcher = roslaunch.parent.ROSLaunchParent(uuid, [navigation_path])
             navigation_launcher.start()
             time.sleep(delay)
