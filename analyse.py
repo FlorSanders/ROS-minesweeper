@@ -26,21 +26,35 @@ def get_strategy(root_path):
         print(f"\t{strategy} - {strategies[strategy]}")
     strategy = input("strategy number: ")
     strategy_name = strategies[int(strategy)]
-    root_path =  os.path.join( root_path ,world_name , strategy_name )
+    root_path =  os.path.join( root_path ,world_name , strategy_name)
 
     #calculate the inter mine detonation time
     ipt = []
+    clear_time = []
     cleared_mines = []
+    n_mines = [40, 50, 30]
     dir = os.listdir(root_path)
+
+    #Loop over all the files
     for file in dir:
         if file[20:] == "mines.txt":
             mine_data = pd.read_csv(os.path.join(root_path , file), sep=';')
             inter_mine_time = mine_data['time'].values
-            cleared_mines.append(mine_data['count'].values)
+
+            #Calculate the 70% clearance time
+            cleared = mine_data['count'].values
+            clearance_time = inter_mine_time[cleared >= 0.7*n_mines[int(world)]]
+            if not clearance_time.size:
+                clear_time.append(1e10)
+            else:
+                clear_time.append(np.max(clearance_time))
+
+            #Calculate the inter mine detonation time
             inter_mine_time = inter_mine_time[1:] - inter_mine_time[:-1]
             ipt.append(inter_mine_time)
+            cleared_mines.append(np.max(cleared))
             
-    return  strategy_name, world_name, np.hstack(ipt), np.hstack(cleared_mines)
+    return  strategy_name, world_name, np.hstack(ipt), np.hstack(cleared_mines), np.array(clearance_time)
 
 IMDT = []
 IMDT.append(get_strategy(root_path))
@@ -50,20 +64,29 @@ while "y" == input("Add more strategies? [y/n]: "):
 
 imdt = []
 strategies = []
+ct = []
 #print some statistics 
-for strategy_name, world_name, data, cleared_mines in IMDT:
-    print(f"\ninter mine detonation time: {world_name} {strategy_name}")
-    print(f"\t mean: {np.mean(data)}")
-    print(f"\t maximum: {np.max(data)}")
-    print(f"\t minimum: {np.min(data)}")
+for strategy_name, world_name, data, cleared_mines, clearance_time in IMDT:
+    print(f"\n Strategy: {world_name} {strategy_name}")
+    print(f"\t mean imdt: {np.mean(data)}")
+    print(f"\t maximum imdt: {np.max(data)}")
     print(f"\t average cleared mines: {np.mean(cleared_mines)}")
+    print(f"\t average 70% clearance time: {np.mean(clearance_time)}")
     imdt.append(data)
+    ct.append(clearance_time)
     strategies.append(strategy_name + "\n" + world_name) 
 
 
-#Create a boxplot 
+#Create a boxplot imdt
 fig, ax = plt.subplots()
 ax.set_ylabel("IMDT[s]")
 ax.set_title("Inter Mine Detonation Time")
 ax.boxplot(imdt, labels=strategies, showfliers=False)
+plt.show()
+
+#Boxplot 70% clearance time
+fig, ax = plt.subplots()
+ax.set_ylabel("IMDT[s]")
+ax.set_title("Time until 70 percent of the mines are detonated")
+ax.boxplot(ct, labels=strategies, showfliers=False)
 plt.show()
