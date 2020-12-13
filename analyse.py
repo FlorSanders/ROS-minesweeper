@@ -41,9 +41,9 @@ def get_strategy(root_path):
             mine_data = pd.read_csv(os.path.join(root_path , file), sep=';')
             inter_mine_time = mine_data['time'].values
 
-            #Calculate the 30% clearance time
+            #Calculate the 40% clearance time
             cleared = mine_data['count'].values
-            clearance_time = inter_mine_time[cleared >= 0.3*n_mines[int(world)]]
+            clearance_time = inter_mine_time[cleared >= 0.4*n_mines[int(world)]]
             if not clearance_time.size:
                 clear_time.append(1e10)
             else:
@@ -71,7 +71,7 @@ for strategy_name, world_name, data, cleared_mines, clearance_time in IMDT:
     print(f"\t mean imdt: {np.mean(data)}")
     print(f"\t maximum imdt: {np.max(data)}")
     print(f"\t average cleared mines: {np.mean(cleared_mines)}")
-    print(f"\t average 30% clearance time: {np.mean(clearance_time)}")
+    print(f"\t average 40% clearance time: {np.mean(clearance_time)}")
     imdt.append(data)
     ct.append(clearance_time)
     strategies.append(strategy_name + "\n" + world_name) 
@@ -84,9 +84,9 @@ ax.set_title("Inter Mine Detonation Time")
 ax.boxplot(imdt, labels=strategies, showfliers=False)
 plt.show()
 
-#Boxplot 30% clearance time
+#Boxplot 40% clearance time
 fig, ax = plt.subplots()
 ax.set_ylabel("AverageTime[s]")
-ax.set_title("Time until 30 percent of the mines are detonated")
+ax.set_title("Time until 40 percent of the mines are detonated")
 ax.boxplot(ct, labels=strategies, showfliers=False)
 plt.show()
