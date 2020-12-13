@@ -1,5 +1,5 @@
 # Group-8
-Robotics 2020-2021 Project: Minesweeping robot - Group 8
+Robotics 2020-2021 Project: Minesweeping Robot - Group 8
 _________________________________________________________
 
 Henrique Rodrigues - Henrique.Rodrigues@UGent.be
