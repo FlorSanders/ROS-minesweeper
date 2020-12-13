@@ -6,7 +6,7 @@ import sys
 import numpy as np
 import random
 
-from my_python_package.robot_controller import RobotController
+from minesweeper_python.robot_controller import RobotController
 
 # Third "minesweeper strategy": random movement with obstacle avoidance
 class SquareSpiral(RobotController):

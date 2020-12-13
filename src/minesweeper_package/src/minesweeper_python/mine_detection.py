@@ -7,10 +7,10 @@ import threading
 from gazebo_msgs.srv import GetModelState, DeleteModel, SpawnModel, GetWorldProperties
 from geometry_msgs.msg import Pose
 from std_msgs.msg import Int16
-from my_python_package.abstract_turtle import AbstractTurtle
+from minesweeper_python.robot_controller import RobotController
 
 
-class mine_detection(AbstractTurtle):
+class mine_detection(RobotController):
     def __init__(self):
         super(mine_detection, self).__init__()
         self.node_name = "mine_detection"

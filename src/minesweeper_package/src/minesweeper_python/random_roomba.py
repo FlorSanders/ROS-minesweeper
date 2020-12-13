@@ -4,7 +4,7 @@ import rospy as ros
 import sys
 import numpy as np
 
-from my_python_package.robot_controller import RobotController
+from minesweeper_python.robot_controller import RobotController
 
 # First "minesweeper strategy": random movement with obstacle avoidance
 class RandomRoomba(RobotController):

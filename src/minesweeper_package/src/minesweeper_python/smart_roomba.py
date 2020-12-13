@@ -7,7 +7,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
-from my_python_package.robot_slam_controller import RobotSlamController
+from minesweeper_python.robot_slam_controller import RobotSlamController
 
 # First "minesweeper strategy": random movement with obstacle avoidance
 class SmartRoomba(RobotSlamController):

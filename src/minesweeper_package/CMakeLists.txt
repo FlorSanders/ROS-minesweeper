@@ -10,6 +10,7 @@ project(minesweeper_package)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  roslaunch
   std_msgs
 )
 
@@ -160,14 +161,11 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  nodes/obstacle_avoidance
-  nodes/motion_detection
   nodes/mine_detection
-  nodes/random_roomba
   nodes/smart_random
   nodes/smart_near
   nodes/smart_far
-  nodes/open_loop_driver
+  nodes/random_roomba
   nodes/worm
   nodes/square_spiral
   scripts/automaton.py

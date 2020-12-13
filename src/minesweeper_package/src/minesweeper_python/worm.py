@@ -5,7 +5,7 @@ import rospy as ros
 import sys
 import numpy as np
 
-from my_python_package.robot_controller import RobotController
+from minesweeper_python.robot_controller import RobotController
 
 # Second "minesweeper strategy": Goes to the top corner and and goes down covering each line
 class Worm(RobotController):
