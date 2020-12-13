@@ -1,1 +1,0 @@
-time;count;mine_x;mine_y;mine_z;robot_x;robot_y;robot_z
