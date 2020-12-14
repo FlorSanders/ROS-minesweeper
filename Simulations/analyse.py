@@ -11,7 +11,7 @@ root_path = os.path.expanduser(os.path.join(os.environ.get("ROBOTICS_PROJECT_DIR
 
 
 #ask for the desired world name
-worlds = os.listdir(root_path)
+worlds = [world for world in os.listdir(root_path) if world[-5:] == "World"]
 def get_strategy(root_path):
     print("Enter the number of the desired world:")
     for world in range(len(worlds)):
