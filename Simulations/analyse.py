@@ -81,12 +81,12 @@ for strategy_name, world_name, data, cleared_mines, clearance_time in IMDT:
 fig, ax = plt.subplots()
 ax.set_ylabel("IMDT[s]")
 ax.set_title("Inter Mine Detonation Time")
-ax.boxplot(imdt, labels=strategies, showfliers=False)
+ax.boxplot(imdt, labels=strategies, showfliers=False, showmeans=True)
 plt.show()
 
 #Boxplot 40% clearance time
 fig, ax = plt.subplots()
-ax.set_ylabel("AverageTime[s]")
+ax.set_ylabel("Time[s]")
 ax.set_title("Time until 40 percent of the mines are detonated")
-ax.boxplot(ct, labels=strategies, showfliers=False)
+ax.boxplot(ct, labels=strategies, showfliers=False, showmeans=True)
 plt.show()
