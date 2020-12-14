@@ -205,7 +205,7 @@ The code found in this repository was developed in order to explore and assess t
 
   - Copy the file name ending on `robot_pos.txt` for which run you want to visualize the robot path.
 
-  - Run the robot_path script.
+  - Run the robot_path script. If you add `-- mines` the detonated mines will be plotted too.
 
     ```bash
     $ python3 robot_path.py <world number> <file name>
@@ -225,7 +225,7 @@ The code found in this repository was developed in order to explore and assess t
     $ python3 analyse.py
     ```
 
-    Follow the CLI instructions to make selections about which data needs to be visualized. Two sets of boxplots will be generated: one giving the interdetonation time for a given configuration and the other shows the time until 30% of the mines have been detonated.
+    Follow the CLI instructions to make selections about which data needs to be visualized. Two sets of boxplots will be generated: one giving the interdetonation time for a given configuration and the other shows the time until 40% of the mines have been detonated.
 
 ## Useful resources
 
