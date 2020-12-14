@@ -65,6 +65,8 @@ class mine_detection(RobotController):
 
 
     def scan_mines(self):
+        """scan for a collission between the robot and a mine and replace the mine by a green mine in that case. The position and the time stamp is written to a log when a mine is detonated"""
+
         get_coordinates = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
         remove_model = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
         robot_coords = get_coordinates("turtlebot3_burger", "").pose.position
@@ -86,11 +88,14 @@ class mine_detection(RobotController):
         time.sleep(0.1)
     
     def spwan_green_mine(self, pose):
+        """"spawn a green mine takes the pose where the mine should be plotted as argument""""
+
         rospy.wait_for_service('/gazebo/spawn_sdf_model')
         spawn_model = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
         spawn_model("cleared_mine_" + str(self.cleared_mines), self.green_mine_model, "", pose, "")
 
     def spawn_mines(self):
+        """spawn mines with a uniform distribution, the variable _spawned_mines contains the number of mines to be spawned"""
         f = open('/home/lander/Desktop/Robotics/Group-8/src/minesweeper_package/gazebo_models/coke_can/model.sdf','r')
         model = f.read()
         pose = Pose()
@@ -104,6 +109,8 @@ class mine_detection(RobotController):
             spawn_model("mine_"+str(i), model, "", pose, "")
 
     def count_mines(self):
+        """Retrieve the distribution of the mines on startup in the gazebo world and write them to the log file ending in _mines.txt"""
+        
         rospy.wait_for_service('/gazebo/get_world_properties')
         get_world_properties = rospy.ServiceProxy('/gazebo/get_world_properties', GetWorldProperties)
         rospy.wait_for_service('/gazebo/get_model_state')
