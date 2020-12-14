@@ -205,7 +205,7 @@ The code found in this repository was developed in order to explore and assess t
 
   - Copy the file name ending on `robot_pos.txt` for which run you want to visualize the robot path.
 
-  - Run the robot_path script.
+  - Run the robot_path script. If you add `-- mines` the detonated mines will be plotted too.
 
     ```bash
     $ python3 robot_path.py <world number> <file name>
