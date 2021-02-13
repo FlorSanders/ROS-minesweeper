@@ -2,5 +2,5 @@
 
 from minesweeper_python.smart_roomba import main
 
-if __name__ == '__main__':
-    main('near')
+if __name__ == "__main__":
+    main("near")

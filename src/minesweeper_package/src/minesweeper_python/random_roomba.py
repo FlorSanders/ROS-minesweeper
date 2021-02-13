@@ -28,20 +28,26 @@ class RandomRoomba(RobotController):
         # If these are available, move straight until blocked or unblock
         while not ros.is_shutdown():
             blocked, ranges = self.scan_for_obstacles()
-            
+
             if blocked:
                 # Picking out the directions that are not actually blocked
-                unblocked_directions = np.concatenate([np.linspace(0, np.pi, len(ranges)//2), np.linspace(-np.pi, 0, len(ranges)//2)])[ranges >= self.thresh]
+                unblocked_directions = np.concatenate(
+                    [
+                        np.linspace(0, np.pi, len(ranges) // 2),
+                        np.linspace(-np.pi, 0, len(ranges) // 2),
+                    ]
+                )[ranges >= self.thresh]
                 # Making a probability distribution such that directions without any obstructions are more likely to be chosen
                 probs = np.exp(ranges[ranges >= self.thresh])
                 try:
-                    probs = probs/np.sum(probs)
+                    probs = probs / np.sum(probs)
                 except:
                     sys.exit("The robot is trapped, no free angles are available")
                 random_choice = np.random.choice(unblocked_directions, p=probs, size=1)
                 self.turn_by(alpha=random_choice, omega=self.omega)
             else:
                 self.go_forward_for(tau=self.tau, v=self.v)
+
 
 # Starting the robot
 def main():

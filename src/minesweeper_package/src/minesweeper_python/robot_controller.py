@@ -18,8 +18,18 @@ class RobotController(object):
     Abstracts away the declaration of ros messages and subscription to ros topics for the rest of the program
     """
 
-    def __init__(self, speed=0.5, angularspeed=np.pi/4, detectionthreshold=0.5, pubrate=0.05, duration=0.1, distance=1.0, angle=np.pi/2, debug=True):
-        """"
+    def __init__(
+        self,
+        speed=0.5,
+        angularspeed=np.pi / 4,
+        detectionthreshold=0.5,
+        pubrate=0.05,
+        duration=0.1,
+        distance=1.0,
+        angle=np.pi / 2,
+        debug=True,
+    ):
+        """ "
         Initialization with definition for the subscribers and publishers as well as some general parameters and variables.
         """
         # Name of our node
@@ -69,21 +79,41 @@ class RobotController(object):
         ros.init_node(self.node_name, log_level=ros.INFO, anonymous=True)
 
         # Setting ros rate
-        self.rate = ros.Rate(1/self.pub_rate)
+        self.rate = ros.Rate(1 / self.pub_rate)
 
         # Callback function on shutdown
         ros.on_shutdown(self.stop_robot)
 
         # Subscribers and publishers
-        self.odom_sub = ros.Subscriber(self.odom_sub_name, Odometry, callback=self.__odom_ros_sub, queue_size=self.queue_size)
-        self.lds_sub = ros.Subscriber(self.lds_sub_name, LaserScan, callback=self.__lds_ros_sub, queue_size=self.queue_size)
-        self.vel_pub = ros.Publisher(self.vel_pub_name, Twist, queue_size=self.queue_size)
+        self.odom_sub = ros.Subscriber(
+            self.odom_sub_name,
+            Odometry,
+            callback=self.__odom_ros_sub,
+            queue_size=self.queue_size,
+        )
+        self.lds_sub = ros.Subscriber(
+            self.lds_sub_name,
+            LaserScan,
+            callback=self.__lds_ros_sub,
+            queue_size=self.queue_size,
+        )
+        self.vel_pub = ros.Publisher(
+            self.vel_pub_name, Twist, queue_size=self.queue_size
+        )
 
         # Wait for the first messages to arrive
-        while any([msg is None for msg in [self.position, self.orientation, self.lds_ranges]]) and not ros.is_shutdown():
-            self.printd('Sleeping...')
+        while (
+            any(
+                [
+                    msg is None
+                    for msg in [self.position, self.orientation, self.lds_ranges]
+                ]
+            )
+            and not ros.is_shutdown()
+        ):
+            self.printd("Sleeping...")
             self.rate.sleep()
-        
+
     def stop_robot(self):
         """
         Callback function for when the robot gets the shutdown command.
@@ -91,13 +121,13 @@ class RobotController(object):
         """
 
         self.t_init = ros.get_time()
-    
+
         while ros.get_time() - self.t_init < 1 and not ros.is_shutdown():
             self.__vel_ros_pub(Twist())
             self.rate.sleep()
-        
-        sys.exit('The robot has been stopped.')
-    
+
+        sys.exit("The robot has been stopped.")
+
     def scan_for_obstacles(self):
         """
         Uses the LDS to scan for obstacles that are in our path.
@@ -105,15 +135,15 @@ class RobotController(object):
         """
         # Fetching our ranges
         ranges = np.array(list(self.lds_ranges))
-        
+
         # If nothing is detected, the lds returns zero. Changing this by a long distance (4m)
-        ranges[ranges == 0.] = 4.
-        ranges[np.isinf(ranges)] = 4.
+        ranges[ranges == 0.0] = 4.0
+        ranges[np.isinf(ranges)] = 4.0
 
         # Select ranges in the direction we are driving
         relevant_ranges = np.concatenate((ranges[-12:], ranges[:12]))
         blocked = np.any(relevant_ranges < self.thresh)
-        
+
         self.printd((np.argmin(ranges), np.min(ranges), len(ranges), blocked))
 
         # Return whether we are close to an object (within 0.5m) together with the whole range
@@ -131,7 +161,7 @@ class RobotController(object):
 
         # Set the initial time
         self.t_init = ros.get_time()
-        
+
         # While we don't go over duration, move forward
         msg = Twist()
         while ros.get_time() - self.t_init < tau and not ros.is_shutdown():
@@ -156,7 +186,9 @@ class RobotController(object):
 
         # Move by the amount we wanted to move by
         msg = Twist()
-        while (self.position.x - x_init)**2 + (self.position.y - y_init)**2 < d**2 and not ros.is_shutdown():
+        while (self.position.x - x_init) ** 2 + (
+            self.position.y - y_init
+        ) ** 2 < d ** 2 and not ros.is_shutdown():
             msg.linear.x = v
             msg.angular.z = 0
             self.__vel_ros_pub(msg)
@@ -164,11 +196,13 @@ class RobotController(object):
 
     def get_z_rotation(self, orientation):
         """
-        Calculates the current z-angle based on     
+        Calculates the current z-angle based on
         """
-        (_, _, yaw) = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+        (_, _, yaw) = euler_from_quaternion(
+            [orientation.x, orientation.y, orientation.z, orientation.w]
+        )
         return yaw
-    
+
     def turn_for(self, tau=None, omega=None):
         """
         Helper function to make the robot turn at angular speed omega for a given duration tau
@@ -205,12 +239,15 @@ class RobotController(object):
 
         # Move by the angle we wanted to move by
         msg = Twist()
-        while abs(self.get_z_rotation(self.orientation) - alpha_init) < abs(alpha) and not ros.is_shutdown():
-            msg.angular.z = np.sign(alpha)*omega
+        while (
+            abs(self.get_z_rotation(self.orientation) - alpha_init) < abs(alpha)
+            and not ros.is_shutdown()
+        ):
+            msg.angular.z = np.sign(alpha) * omega
             msg.linear.x = 0
             self.__vel_ros_pub(msg)
             self.rate.sleep()
-        
+
     def move(self):
         """
         Function that moves according to the predefined strategy.
@@ -218,14 +255,14 @@ class RobotController(object):
         """
         while not ros.is_shutdown():
             self.rate.sleep()
-    
+
     def __odom_ros_sub(self, msg):
         """
         Handles subscription for the odometry topic.
         """
         self.position = msg.pose.pose.position
         self.orientation = msg.pose.pose.orientation
-    
+
     def __lds_ros_sub(self, msg):
         """
         Handles subscription for the Light Distance Sensor topic.
