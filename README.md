@@ -1,4 +1,5 @@
 # Minesweeping Robot
+
 Robotics 2020-2021 Project
 Minesweeping Robot - Group 8
 
@@ -226,16 +227,19 @@ The code found in this repository was developed in order to explore and assess t
     ```
 
     Follow the CLI instructions to make selections about which data needs to be visualized. Two sets of boxplots will be generated: one giving the interdetonation time for a given configuration and the other shows the time until 40% of the mines have been detonated.
-    
+
 - Average time until the nth mine is detonated
-   - Place the log files for all of your simulations in the right subfolder of the `Simulations` folder.
+
+  - Place the log files for all of your simulations in the right subfolder of the `Simulations` folder.
 
   - Change directory into the `Simulations` folder.
 
   - Run the analyse script.
+
     ```bash
     $ python3 atud.py
     ```
+
 ## Useful resources
 
 Of course this project would not have been possible with the amazing tools and resources that are freely available on the web. Below we give some of the ones that proved most useful to us.
